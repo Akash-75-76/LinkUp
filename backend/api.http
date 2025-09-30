@@ -1,10 +1,64 @@
+###Register User
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Om",
+  "username": "om123",
+  "email": "om@gmail.com",
+  "password": "1234"
+}
+
+###Login User
+
 POST http://localhost:5000/api/users/login
 content-Type: application/json
 
 {
  
   
-  "email": "akash@example.com",
-  "password": "mypassword"
+  "email": "om@gmail.com",
+  "password": "1234"
 
 }
+
+
+###Get User Profile
+
+GET http://localhost:5000/api/users/get_user_profile
+Authorization: Bearer 812f256ad1b942226be60daa1e49b147ff7c1cf5e6081e11e0eae50f45cb6bac
+
+
+###Update User Profile
+
+POST http://localhost:5000/api/users/update_profile_data
+Content-Type: application/json
+
+{
+  "token": "a4157ec413af8fb45568c3660ebdd86f8ffe5d4055b10cd02a5c526e45b1e23d",
+  "bio": "Full Stack Developer with 2 years of experience",
+  "currentPost": "Team Head - Documentation",
+  "pastWork": [
+    {
+      "company": "ABC Pvt Ltd",
+      "position": "Software Engineer",
+      "years": "2023-2024"
+    },
+    {
+      "company": "XYZ Corp",
+      "position": "Intern",
+      "years": "2022"
+    }
+  ],
+  "education": [
+    {
+      "school": "PES Modern College of Engineering",
+      "degree": "B.E. Computer Engineering",
+      "fieldOfStudy": "Computer Science"
+    }
+  ]
+}
+
+
+### Get All Users
+GET http://localhost:5000/api/users/all

@@ -31,6 +31,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
+app.use('/uploads', express.static('uploads'));
 // 404 Handler - REMOVED THE PROBLEMATIC WILDCARD
 app.use((req, res, next) => {
   res.status(404).json({ 

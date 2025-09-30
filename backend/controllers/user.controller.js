@@ -53,3 +53,22 @@ export const login=async(req,res)=>{
         return res.status(500).json({ message: error.message });
     }
 }
+
+export const uploadProfilePic = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized - Token missing" });
+    }
+
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+
+    return res.status(200).json({ message: "Token is valid", userId: user._id });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};

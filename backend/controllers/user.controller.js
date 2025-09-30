@@ -281,3 +281,114 @@ export const downloadProfile = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+export const sendConnectionRequest = async (req, res) => {
+  const { token, connectionId } = req.body;
+  
+  try {
+    const user = await User.findOne({ token });
+    
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+    
+    // Prevent self-connection
+    if (user._id.toString() === connectionId) {
+      return res.status(400).json({ message: "Cannot send connection request to yourself" });
+    }
+    
+    const connectionUser = await User.findById(connectionId);
+    if (!connectionUser) {
+      return res.status(404).json({ message: "User to connect not found" });
+    }
+    
+    // ✅ Use correct field names that match your schema
+    const existingRequest = await ConnectionRequest.findOne({ 
+      userId: user._id, 
+      connectionId: connectionId 
+    });
+    
+    if (existingRequest) {
+      return res.status(400).json({ message: "Connection request already sent" });
+    }
+
+    // ✅ Use schema field names (userId, connectionId)
+    const request = new ConnectionRequest({
+      userId: user._id,
+      connectionId: connectionId
+    });
+    
+    await request.save();
+
+    return res.status(200).json({ message: "Connection request sent successfully" });
+    
+  } catch (error) {
+    console.error("Error sending connection request:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+export const getMyConnectionRequests = async (req, res) => {
+  const { token } = req.body;
+  try {
+    // ✅ Fix: Use findOne instead of find
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+    
+    // ✅ Get requests sent TO the current user (pending requests)
+    const requests = await ConnectionRequest.find({ 
+      connectionId: user._id, 
+      status: 'pending' 
+    }).populate('userId', 'name username email profilePicture');
+    
+    return res.status(200).json(requests);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const whatAreMyConnections = async (req, res) => {
+  const { token } = req.body;
+  try {
+    // ✅ Fix: Use findOne instead of find
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+    
+    // ✅ Get all accepted connections where user is either userId OR connectionId
+    const connections = await ConnectionRequest.find({
+      $or: [
+        { userId: user._id, status: 'accepted' },
+        { connectionId: user._id, status: 'accepted' }
+      ]
+    })
+    .populate('userId', 'name username email profilePicture')
+    .populate('connectionId', 'name username email profilePicture');
+    
+    return res.status(200).json(connections);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getSentConnectionRequests = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+    
+    // Get requests sent BY the current user
+    const sentRequests = await ConnectionRequest.find({ 
+      userId: user._id 
+    }).populate('connectionId', 'name username email profilePicture');
+    
+    return res.status(200).json(sentRequests);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};

@@ -62,3 +62,37 @@ Content-Type: application/json
 
 ### Get All Users
 GET http://localhost:5000/api/users/all
+
+
+### Create Post (Text Only)
+POST http://localhost:5000/api/posts/create_post
+Content-Type: application/json
+
+{
+  "token": "aaf77e99bf40922f9600fd50858ebd61fa352079df2d1ec4eaab8d937128be02",
+  "body": "This is my first post without media!"
+}
+
+
+### Get All Posts
+GET http://localhost:5000/api/posts/all_posts
+
+
+### Create Post with Media
+POST http://localhost:5000/api/posts/create_post
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="token"
+
+aaf77e99bf40922f9600fd50858ebd61fa352079df2d1ec4eaab8d937128be02
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="body"
+
+This is my post with an image!
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="media"; filename="msd2.jpg"
+Content-Type: image/jpeg
+
+< C:/Users/Akash Deshmukh/Pictures/msd2.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--

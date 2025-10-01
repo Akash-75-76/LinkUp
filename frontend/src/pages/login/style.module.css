@@ -1,26 +1,24 @@
 .container {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  align-items: center;
+  min-height: 100vh;
+  background: #f3f4f6;
 }
 
 .cardContainer {
   display: flex;
-  max-width: 900px;
-  width: 100%;
+  flex-direction: row;
+  width: 900px;
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
   overflow: hidden;
-  min-height: 550px;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
 }
 
 .cardContainer_left {
   flex: 1;
-  padding: 40px;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -28,179 +26,64 @@
 
 .cardContainer_right {
   flex: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
   color: white;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.heading {
+.cardLeft_heading {
   font-size: 2rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin-bottom: 8px;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
 }
 
-.subheading {
-  color: #718096;
-  font-size: 0.9rem;
-}
-
-.form {
-  width: 100%;
-}
-
-.inputContainer {
-  margin-bottom: 25px;
+.inputContainers {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .inputRow {
   display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.inputRow .inputField {
-  flex: 1;
+  gap: 1rem;
 }
 
 .inputField {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  margin-bottom: 15px;
-  box-sizing: border-box;
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
-.inputField:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.inputField::placeholder {
-  color: #a0aec0;
-}
-
-.submitButton {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.submitBtn {
+  margin-top: 1.5rem;
+  padding: 0.9rem;
   border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: white;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 20px;
+  transition: background 0.3s;
 }
 
-.submitButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-}
-
-.submitButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.loadingText {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.footer {
-  text-align: center;
+.submitBtn:hover {
+  background: #4338ca;
 }
 
 .switchText {
-  color: #718096;
-  font-size: 14px;
-  margin: 0;
-}
-
-.switchButton {
-  background: none;
-  border: none;
-  color: #667eea;
-  font-weight: 600;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #4f46e5;
   cursor: pointer;
-  margin-left: 5px;
-  text-decoration: underline;
-  transition: color 0.3s ease;
-}
-
-.switchButton:hover {
-  color: #5a6fd8;
-}
-
-.illustration {
   text-align: center;
-  padding: 40px;
 }
 
-.illustrationContent {
-  max-width: 300px;
-}
-
-.illustrationTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-}
-
-.illustrationText {
-  font-size: 1rem;
-  line-height: 1.6;
-  opacity: 0.9;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .cardContainer {
-    flex-direction: column;
-    max-width: 400px;
-  }
-  
-  .cardContainer_right {
-    display: none;
-  }
-  
-  .cardContainer_left {
-    padding: 30px 25px;
-  }
-  
-  .inputRow {
-    flex-direction: column;
-    gap: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 10px;
-  }
-  
-  .cardContainer_left {
-    padding: 25px 20px;
-  }
-  
-  .heading {
-    font-size: 1.6rem;
-  }
+.switchText:hover {
+  text-decoration: underline;
 }

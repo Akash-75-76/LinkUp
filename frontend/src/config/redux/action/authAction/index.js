@@ -47,3 +47,31 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+
+export const getUserAndProfile = createAsyncThunk(
+  'user/getUserAndProfile',
+  async ({ token }, { rejectWithValue }) => {
+    try {
+     const response = await clientServer.get('/users/getUserAndProfile', {
+  params: { token },
+});
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
+export const getAllUsers = createAsyncThunk(
+  "user/getAllUsers",
+  async (_, thunkAPI) => {
+    try {
+      const response = await clientServer.get("/users/all"); // Fixed route
+      return thunkAPI.fulfillWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);

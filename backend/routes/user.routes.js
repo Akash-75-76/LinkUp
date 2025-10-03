@@ -41,7 +41,8 @@ router.route("/login").post(login);
 
 // User profile routes
 router.route("/user_update").post(updateUserProfile);
-router.route("/get_user_profile").get(getUserAndProfile);
+router.route("/getUserAndProfile").get(getUserAndProfile);
+
 router.route("/update_profile_data").post(updateProfileData);
 
 // User data routes

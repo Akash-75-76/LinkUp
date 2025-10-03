@@ -146,14 +146,13 @@ export const updateUserProfile = async (req, res) => {
 
 export const getUserAndProfile = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // Get token from query
+    const { token } = req.query;
+    if (!token) {
       return res.status(401).json({ message: "Unauthorized - No token" });
     }
 
-    const token = authHeader.split(" ")[1];
     const user = await User.findOne({ token });
-
     if (!user) {
       return res.status(401).json({ message: "Unauthorized - Invalid token" });
     }
@@ -168,6 +167,7 @@ export const getUserAndProfile = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 export const updateProfileData = async (req, res) => {
   try {

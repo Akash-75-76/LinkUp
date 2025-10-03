@@ -3,7 +3,7 @@
 .container {
   width: 100%;
   background: transparent;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
@@ -16,12 +16,13 @@
   padding: 1.5rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  animation: slideDown 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .navbar h1 {
   font-size: 2.5rem;
   font-weight: 800;
-  color: white;
+  color: rgb(234, 49, 221);
   margin: 0;
   transition: all 0.3s ease;
   letter-spacing: -0.5px;
@@ -41,6 +42,22 @@
   gap: 1.5rem;
 }
 
+/* User menu styles */
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.welcomeText {
+  color:black;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+/* Button styles - keeping your original colors */
 .buttonJoin {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -94,6 +111,74 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
+/* Profile button specific styles */
+.profileButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.7rem 1.8rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 4px 15px rgba(102, 126, 234, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: none;
+  outline: none;
+  letter-spacing: 0.3px;
+}
+
+.profileButton:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 
+    0 8px 25px rgba(102, 126, 234, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Auth buttons container */
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Login button variant */
+.loginButton {
+  color: white;
+  padding: 0.7rem 1.8rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.loginButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.logoutButton {
+  margin-left: 10px;
+  padding: 6px 12px;
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #d9363e;
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
@@ -105,9 +190,19 @@
     letter-spacing: -0.3px;
   }
   
-  .buttonJoin {
+  .buttonJoin,
+  .profileButton,
+  .loginButton {
     padding: 0.75rem 1.75rem;
     font-size: 1rem;
+  }
+  
+  .welcomeText {
+    font-size: 1rem;
+  }
+  
+  .userMenu {
+    gap: 1rem;
   }
 }
 
@@ -120,9 +215,15 @@
     font-size: 1.8rem;
   }
   
-  .buttonJoin {
+  .buttonJoin,
+  .profileButton,
+  .loginButton {
     padding: 0.7rem 1.5rem;
     font-size: 0.95rem;
+  }
+  
+  .welcomeText {
+    display: none; /* Hide welcome text on very small screens */
   }
 }
 
@@ -136,8 +237,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.navbar {
-  animation: slideDown 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }

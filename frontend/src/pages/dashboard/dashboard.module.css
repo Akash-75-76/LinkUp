@@ -1,72 +1,122 @@
+/* pages/dashboard/dashboard.module.css */
 .dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: calc(100vh - 140px);
 }
 
 .welcomeSection {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
   text-align: center;
-  margin-bottom: 2rem;
-  padding: 2rem;
-  background: linear-gradient(135deg, #0073b1, #00a0dc);
-  border-radius: 12px;
-  color: white;
 }
 
 .welcomeSection h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 2rem;
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
 }
 
 .welcomeSection p {
-  margin: 0;
+  font-size: var(--font-size-lg);
   opacity: 0.9;
 }
 
 .dashboardContent {
   display: grid;
-  grid-template-columns: 300px 1fr 250px;
-  gap: 2rem;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
 }
 
-.leftColumn, .rightColumn {
+.leftColumn,
+.rightColumn {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .mainColumn {
-  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 .statsCard {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border: 1px solid #e1e8ed;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
 }
 
 .statsCard h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
-  border-bottom: 1px solid #e1e8ed;
-  padding-bottom: 0.5rem;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-4);
+  text-align: center;
 }
 
 .statItem {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--gray-50);
+  margin-bottom: var(--space-3);
+  transition: transform 0.2s ease;
+}
+
+.statItem:hover {
+  transform: translateY(-2px);
+  background: var(--secondary-blue);
+}
+
+.statItem:last-child {
+  margin-bottom: 0;
 }
 
 .statNumber {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #0073b1;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--primary-blue);
+  margin-bottom: var(--space-1);
 }
 
 .statLabel {
-  color: #666;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .dashboardContent {
+    grid-template-columns: 1fr 2fr;
+  }
+  
+  .rightColumn {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardContent {
+    grid-template-columns: 1fr;
+  }
+  
+  .welcomeSection {
+    padding: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+  
+  .welcomeSection h1 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .welcomeSection p {
+    font-size: var(--font-size-base);
+  }
 }

@@ -76,7 +76,7 @@ const PostFeed = () => {
 
   const startEditComment = (comment) => {
     setEditingComment(comment._id);
-    setEditCommentText(comment.text);
+    setEditCommentText(comment.body);
   };
 
   const cancelEditComment = () => {
@@ -257,7 +257,7 @@ const PostFeed = () => {
                     </div>
                   ) : (
                     <div className={styles.commentContent}>
-                      <p>{comment.text}</p>
+                      <p>{comment.body}</p>
                       {user?._id === comment.userId?._id && (
                         <div className={styles.commentActions}>
                           <button

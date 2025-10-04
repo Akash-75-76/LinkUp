@@ -1,20 +1,24 @@
 import mongoose from 'mongoose';
 
 const CommentSchema = new mongoose.Schema({
-    userId:{
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    postId:{
+    postId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Post',
         required: true  
     },
-    body:{
+    body: {
         type: String,
-        required: true
-    }
+        required: true,
+    },
+    createdAt: {  // ✅ Add createdAt field
+        type: Date,
+        default: Date.now,
+    },
 });
 
 const Comment = mongoose.model('Comment', CommentSchema);

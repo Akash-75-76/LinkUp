@@ -46,15 +46,17 @@ const convertUserDataTOPDF = async (userProfile) => {
 
 export const register = async (req, res) => {
   try {
-    const { name, username, email, password } = req.body;
+    const { name, username, email, password, bio, currentPost, education, pastWork } = req.body;
+    
     if (!name || !username || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All required fields are missing" });
     }
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       name,
@@ -63,10 +65,17 @@ export const register = async (req, res) => {
       password: hashedPassword,
     });
     await newUser.save();
-    const profile = new Profile({ userId: newUser._id });
+
+    // Create profile with all the data
+    const profile = new Profile({ 
+      userId: newUser._id,
+      bio: bio || "",
+      currentPost: currentPost || "",
+      education: education || [],
+      pastWork: pastWork || []
+    });
     await profile.save();
     
-    // ✅ Return user data along with token for registration too
     const token = crypto.randomBytes(32).toString("hex");
     await User.updateOne({ _id: newUser._id }, { $set: { token } });
     
@@ -85,7 +94,6 @@ export const register = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -509,12 +517,9 @@ export const getUserProfileById = async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const user = await User.findById(userId).select('-password -token');
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const profile = await Profile.findOne({ userId }).populate('userId');
+    const profile = await Profile.findOne({ userId })
+      .populate('userId', 'name username email profilePicture');
+    
     if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }

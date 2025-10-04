@@ -10,14 +10,24 @@ function DiscoverPage() {
   const dispatch = useDispatch()
   const authState = useSelector((state) => state.auth)
   const [sentRequests, setSentRequests] = useState(new Set())
-  const [hasFetchedUsers, setHasFetchedUsers] = useState(false) // ✅ Add state to prevent infinite fetches
+  const [hasFetchedUsers, setHasFetchedUsers] = useState(false)
 
   useEffect(() => {
-    if (!hasFetchedUsers) { // ✅ Only fetch if not already fetched
+    if (!hasFetchedUsers) {
       dispatch(getAllUsers())
       setHasFetchedUsers(true)
     }
-  }, [dispatch, hasFetchedUsers]) // ✅ Add dependency
+  }, [dispatch, hasFetchedUsers])
+
+  // ✅ DEBUG CODE ADDED HERE
+  useEffect(() => {
+    if (authState.all_users && authState.user) {
+      console.log('=== DEBUG USER FILTERING ===');
+      console.log('Current User:', authState.user);
+      console.log('All Users:', authState.all_users.map(u => ({ id: u._id, name: u.name })));
+      console.log('Filtered Users:', filteredUsers.map(u => ({ id: u._id, name: u.name })));
+    }
+  }, [authState.all_users, authState.user]);
 
   const handleConnect = (userId) => {
     if (authState.user?.token) {
@@ -33,10 +43,42 @@ function DiscoverPage() {
     return sentRequests.has(userId)
   }
 
-  // Filter out current user from the list
-  const filteredUsers = authState.all_users?.filter(
-    user => user._id !== authState.user?._id
-  ) || []
+  // FIXED: Better filtering to exclude current user and already connected users
+  const filteredUsers = authState.all_users?.filter(user => {
+    // Exclude current user
+    if (user._id === authState.user?._id) {
+      return false
+    }
+    
+    // Exclude already connected users
+    const isConnected = authState.connections?.some(connection => 
+      connection.userId._id === user._id || connection.connectionId._id === user._id
+    )
+    
+    // Exclude users with pending connection requests
+    const hasPendingRequest = authState.connectionRequests?.some(request => 
+      request.userId._id === user._id
+    )
+    
+    // Exclude users we've sent requests to
+    const sentRequestToUser = authState.sentConnectionRequests?.some(request => 
+      request.connectionId._id === user._id
+    )
+    
+    return !isConnected && !hasPendingRequest && !sentRequestToUser
+  }) || []
+
+  // Debug logging to check filtering
+  useEffect(() => {
+    if (authState.all_users && authState.user) {
+      console.log('All users:', authState.all_users.length)
+      console.log('Current user ID:', authState.user._id)
+      console.log('Filtered users:', filteredUsers.length)
+      console.log('Connections:', authState.connections?.length)
+      console.log('Connection requests:', authState.connectionRequests?.length)
+      console.log('Sent requests:', authState.sentConnectionRequests?.length)
+    }
+  }, [authState.all_users, authState.user, filteredUsers])
 
   return (
     <UserLayout>
@@ -58,15 +100,24 @@ function DiscoverPage() {
                       <div className={styles.userAvatar}>
                         {user.profilePicture && user.profilePicture !== 'default.jpg' ? (
                           <img 
-                            src={`/uploads/${user.profilePicture}`} 
+                            src={`http://localhost:5000/uploads/${user.profilePicture}`} 
                             alt={user.name}
                             className={styles.avatarImage}
+                            onError={(e) => {
+                              // Fallback to placeholder if image fails to load
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
                           />
-                        ) : (
-                          <div className={styles.avatarPlaceholder}>
-                            {user.name?.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        ) : null}
+                        <div 
+                          className={styles.avatarPlaceholder}
+                          style={{ 
+                            display: (!user.profilePicture || user.profilePicture === 'default.jpg') ? 'flex' : 'none' 
+                          }}
+                        >
+                          {user.name?.charAt(0).toUpperCase()}
+                        </div>
                       </div>
                       <div className={styles.userInfo}>
                         <h3 className={styles.userName}>{user.name}</h3>
@@ -96,7 +147,12 @@ function DiscoverPage() {
                   </div>
                 ))
               ) : (
-                <div className={styles.noUsers}>No users found</div>
+                <div className={styles.noUsers}>
+                  {authState.all_users?.length > 0 ? 
+                    'No new users to discover. Try again later!' : 
+                    'No users found'
+                  }
+                </div>
               )}
             </div>
           )}

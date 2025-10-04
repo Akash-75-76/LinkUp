@@ -1,0 +1,243 @@
+.createPostPage {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0;
+  background: var(--white);
+  min-height: 100vh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.closeButton {
+  background: var(--gray-200);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--gray-300);
+}
+
+.header h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.header p {
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.postForm {
+  padding: 20px;
+}
+
+.textareaContainer {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.postTextarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  resize: vertical;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease;
+  background: var(--gray-50);
+  min-height: 150px;
+}
+
+.postTextarea:focus {
+  border-color: var(--primary-blue);
+  background: var(--white);
+  box-shadow: 0 0 0 3px var(--secondary-blue);
+}
+
+.postTextarea::placeholder {
+  color: var(--gray-400);
+}
+
+.charCount {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+  background: var(--white);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.mediaPreview {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 10px;
+}
+
+.fileInfo {
+  background: var(--gray-100);
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.removeMediaButton {
+  background: var(--error);
+  color: var(--white);
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.removeMediaButton:hover {
+  background: #dc2626;
+}
+
+.postActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.mediaUpload {
+  flex: 1;
+}
+
+.uploadLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadLabel:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-400);
+}
+
+.uploadIcon {
+  font-size: 18px;
+}
+
+.uploadInput {
+  display: none;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.cancelButton {
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.submitButton {
+  padding: 10px 24px;
+  background: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.submitButton:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .createPostPage {
+    padding: 0;
+  }
+  
+  .header {
+    padding: 15px;
+  }
+  
+  .postForm {
+    padding: 15px;
+  }
+  
+  .postActions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .actionButtons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .cancelButton,
+  .submitButton {
+    flex: 1;
+  }
+}

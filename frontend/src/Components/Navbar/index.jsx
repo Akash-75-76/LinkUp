@@ -10,15 +10,19 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.auth);
 
-  // Debug logging (commented out for production)
-  // console.log('Navbar authState:', authState);
-  // console.log('Logged in:', authState.loggedIn);
-  // console.log('Profile fetched:', authState.profileFetched);
-  // console.log('User:', authState.user);
-
   const handleLogout = () => {
     dispatch(logout());
     router.push("/login");
+  };
+
+  const handleViewProfile = () => {
+    if (authState.user?._id) {
+      window.open(`/profile/${authState.user._id}`, '_blank');
+    } else {
+      console.error('User ID not available');
+      // Optional: redirect to current user's profile page without ID
+      router.push('/profile');
+    }
   };
 
   return (
@@ -35,7 +39,7 @@ const Navbar = () => {
                 Hey {authState.user?.name || 'User'}
               </span>
               <div 
-                onClick={() => router.push("/profile")} 
+                onClick={handleViewProfile}
                 className={styles.profileButton}
               >
                 View Profile

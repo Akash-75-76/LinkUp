@@ -5,6 +5,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import { sendConnectionRequest } from '@/config/redux/action/authAction'
 import styles from "./profile.module.css"
 
+// Add default avatar
+const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjIwIiBmaWxsPSIjOUI5QjlCIi8+CjxwYXRoIGQ9Ik0wIDg1QzAgNzAuNjQgMTEuNjQgNTkgMjYgNTlINzRDODguMzYgNTkgMTAwIDcwLjY0IDEwMCA4NVYxMDBIMFY4NVoiIGZpbGw9IiM5QjlCOUIiLz4KPC9zdmc+";
+
 function UserProfile() {
   const router = useRouter()
   const { id } = router.query
@@ -12,7 +15,7 @@ function UserProfile() {
   const dispatch = useDispatch()
   const [userProfile, setUserProfile] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [connectionStatus, setConnectionStatus] = useState('not_connected') // ✅ Track connection status
+  const [connectionStatus, setConnectionStatus] = useState('not_connected')
 
   useEffect(() => {
     if (id) {
@@ -20,6 +23,19 @@ function UserProfile() {
       checkConnectionStatus(id)
     }
   }, [id])
+
+  // Debug the profile data
+  useEffect(() => {
+    if (userProfile) {
+      console.log('=== PROFILE DATA DEBUG ===');
+      console.log('Full userProfile:', userProfile);
+      console.log('User ID data:', userProfile.userId);
+      console.log('Bio:', userProfile.bio);
+      console.log('Current Post:', userProfile.currentPost);
+      console.log('Past Work:', userProfile.pastWork);
+      console.log('Education:', userProfile.education);
+    }
+  }, [userProfile]);
 
   const fetchUserProfile = async (userId) => {
     setIsLoading(true)
@@ -29,6 +45,7 @@ function UserProfile() {
         throw new Error('Profile not found')
       }
       const data = await response.json()
+      console.log('API Response:', data); // Debug API response
       setUserProfile(data)
     } catch (error) {
       console.error('Error fetching profile:', error)
@@ -39,17 +56,16 @@ function UserProfile() {
   }
 
   const checkConnectionStatus = (userId) => {
-    // ✅ Check if users are already connected
     if (authState.connections?.some(conn => 
-      conn.userId._id === userId || conn.connectionId._id === userId
+      conn.userId?._id === userId || conn.connectionId?._id === userId
     )) {
       setConnectionStatus('connected')
     } else if (authState.connectionRequests?.some(req => 
-      req.userId._id === userId
+      req.userId?._id === userId
     )) {
       setConnectionStatus('request_sent')
     } else if (authState.sentConnectionRequests?.some(req => 
-      req.connectionId._id === userId
+      req.connectionId?._id === userId
     )) {
       setConnectionStatus('request_pending')
     }
@@ -73,7 +89,7 @@ function UserProfile() {
     if (!userProfile) return
     
     try {
-      const response = await fetch(`http://localhost:5000/api/users/download_profile?user_id=${userProfile.userId._id}`)
+      const response = await fetch(`http://localhost:5000/api/users/download_profile?user_id=${userProfile.userId?._id || userProfile._id}`)
       if (!response.ok) {
         throw new Error('Failed to download resume')
       }
@@ -82,7 +98,7 @@ function UserProfile() {
       const a = document.createElement('a')
       a.style.display = 'none'
       a.href = url
-      a.download = `resume_${userProfile.userId.username}.pdf`
+      a.download = `resume_${userProfile.userId?.username || 'user'}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -105,13 +121,28 @@ function UserProfile() {
     }
   }
 
+  // Helper function to get user data safely
+  const getUserData = () => {
+    if (!userProfile) return null;
+    
+    // Handle different possible data structures
+    if (userProfile.userId) {
+      return userProfile.userId; // Populated user data
+    } else if (userProfile.name) {
+      return userProfile; // Direct user data
+    }
+    return null;
+  }
+
+  const userData = getUserData();
+
   if (isLoading) return (
     <UserLayout>
       <div className={styles.loading}>Loading profile...</div>
     </UserLayout>
   )
   
-  if (!userProfile) return (
+  if (!userProfile || !userData) return (
     <UserLayout>
       <div className={styles.error}>Profile not found</div>
     </UserLayout>
@@ -128,17 +159,20 @@ function UserProfile() {
           <div className={styles.profileInfo}>
             <div className={styles.avatarSection}>
               <img 
-                src={userProfile.userId.profilePicture && userProfile.userId.profilePicture !== 'default.jpg' ? 
-                  `/uploads/${userProfile.userId.profilePicture}` : 
-                  '/default-avatar.png'
+                src={userData.profilePicture && userData.profilePicture !== 'default.jpg' ? 
+                  `http://localhost:5000/uploads/${userData.profilePicture}` : 
+                  DEFAULT_AVATAR
                 } 
-                alt={userProfile.userId.name}
+                alt={userData.name}
                 className={styles.profileAvatar}
+                onError={(e) => {
+                  e.target.src = DEFAULT_AVATAR;
+                }}
               />
             </div>
             <div className={styles.profileDetails}>
-              <h1>{userProfile.userId.name}</h1>
-              <p className={styles.username}>@{userProfile.userId.username}</p>
+              <h1>{userData.name || 'No name'}</h1>
+              <p className={styles.username}>@{userData.username || 'No username'}</p>
               <p className={styles.bio}>{userProfile.bio || 'No bio available'}</p>
               <p className={styles.currentPosition}>
                 {userProfile.currentPost || 'No current position'}

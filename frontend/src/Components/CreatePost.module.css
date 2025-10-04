@@ -1,62 +1,77 @@
+/* Components/CreatePost/CreatePost.module.css */
 .createPost {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border: 1px solid #e1e8ed;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-6);
 }
 
 .createPost h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-4);
 }
 
 .postForm {
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
 }
 
 .postTextarea {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #e1e8ed;
-  border-radius: 8px;
+  padding: var(--space-4);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
   resize: vertical;
-  min-height: 100px;
   font-family: inherit;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease;
+  background: var(--gray-50);
 }
 
 .postTextarea:focus {
-  outline: none;
-  border-color: #0073b1;
+  border-color: var(--primary-blue);
+  background: var(--white);
+}
+
+.postTextarea::placeholder {
+  color: var(--gray-400);
 }
 
 .postActions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .mediaUpload {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 .uploadLabel {
-  padding: 8px 16px;
-  background: #f0f2f5;
-  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .uploadLabel:hover {
-  background: #e4e6e9;
+  background: var(--gray-200);
+  border-color: var(--gray-400);
 }
 
 .uploadInput {
@@ -64,8 +79,8 @@
 }
 
 .fileName {
-  font-size: 0.8rem;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -73,21 +88,34 @@
 }
 
 .submitButton {
-  padding: 10px 24px;
-  background: #0073b1;
-  color: white;
-  border: none;
-  border-radius: 24px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s;
+  padding: var(--space-3) var(--space-6);
+  background: var(--primary-blue);
+  color: var(--white);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+  min-width: 80px;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #005885;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .submitButton:disabled {
-  background: #ccc;
+  background: var(--gray-400);
   cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .postActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mediaUpload {
+    justify-content: space-between;
+  }
 }

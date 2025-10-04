@@ -1,240 +1,130 @@
-/* styles.module.css */
-
+/* Components/Navbar/styles.module.css */
 .container {
-  width: 100%;
-  background: transparent;
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
   z-index: 1000;
 }
 
 .navbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
+  justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
-  animation: slideDown 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding: var(--space-4) var(--space-4);
+  height: 70px;
 }
 
 .navbar h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: rgb(234, 49, 221);
-  margin: 0;
-  transition: all 0.3s ease;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--primary-blue);
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .navbar h1:hover {
-  transform: translateY(-3px);
-  text-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
-  cursor: pointer;
+  color: var(--primary-dark);
 }
 
 .navBarOptionContainer {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-4);
 }
 
-/* User menu styles */
 .userMenu {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-4);
 }
 
 .welcomeText {
-  color:black;
-  font-size: 1.1rem;
-  font-weight: 600;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  margin: 0;
+  color: var(--gray-700);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
 }
 
-/* Button styles - keeping your original colors */
+.profileButton,
+.logoutButton,
+.loginButton,
 .buttonJoin {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.85rem 2rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 1.1rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 
-    0 6px 20px rgba(102, 126, 234, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: none;
-  outline: none;
-  letter-spacing: 0.5px;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 
-.buttonJoin::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.6s;
-}
-
-.buttonJoin:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 
-    0 12px 30px rgba(102, 126, 234, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.buttonJoin:hover::before {
-  left: 100%;
-}
-
-.buttonJoin:active {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 
-    0 4px 15px rgba(102, 126, 234, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-/* Profile button specific styles */
 .profileButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.7rem 1.8rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 
-    0 4px 15px rgba(102, 126, 234, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: none;
-  outline: none;
-  letter-spacing: 0.3px;
+  background: var(--secondary-blue);
+  color: var(--primary-blue);
+  border: 1px solid var(--primary-light);
 }
 
 .profileButton:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 
-    0 8px 25px rgba(102, 126, 234, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-/* Auth buttons container */
-.authButtons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Login button variant */
-.loginButton {
-  color: white;
-  padding: 0.7rem 1.8rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.loginButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
+  background: var(--primary-light);
+  color: var(--white);
 }
 
 .logoutButton {
-  margin-left: 10px;
-  padding: 6px 12px;
-  background-color: #ff4d4f;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
 }
 
 .logoutButton:hover {
-  background-color: #d9363e;
+  background: var(--error);
+  color: var(--white);
+  border-color: var(--error);
 }
 
+.loginButton {
+  background: transparent;
+  color: var(--primary-blue);
+  border: 1px solid var(--primary-blue);
+}
 
-/* Responsive Design */
+.loginButton:hover {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.buttonJoin {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.buttonJoin:hover {
+  background: var(--primary-dark);
+}
+
+.authButtons {
+  display: flex;
+  gap: var(--space-3);
+}
+
 @media (max-width: 768px) {
   .navbar {
-    padding: 1.2rem 1.5rem;
-  }
-  
-  .navbar h1 {
-    font-size: 2rem;
-    letter-spacing: -0.3px;
-  }
-  
-  .buttonJoin,
-  .profileButton,
-  .loginButton {
-    padding: 0.75rem 1.75rem;
-    font-size: 1rem;
+    padding: var(--space-3);
   }
   
   .welcomeText {
-    font-size: 1rem;
+    display: none;
   }
   
   .userMenu {
-    gap: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar {
-    padding: 1rem;
+    gap: var(--space-2);
   }
   
-  .navbar h1 {
-    font-size: 1.8rem;
-  }
-  
-  .buttonJoin,
-  .profileButton,
-  .loginButton {
-    padding: 0.7rem 1.5rem;
-    font-size: 0.95rem;
-  }
-  
-  .welcomeText {
-    display: none; /* Hide welcome text on very small screens */
-  }
-}
-
-/* Animation for navbar entrance */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .authButtons {
+    gap: var(--space-2);
   }
 }

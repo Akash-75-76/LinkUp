@@ -39,21 +39,23 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       localStorage.removeItem("token");
-      state.user = null;
-      state.loggedIn = false;
-      state.profileFetched = false;
-      state.isTokenThere = false; // ✅ Reset token state on logout
+      return initialState; // Complete reset on logout
     },
     setTokenIsThere: (state) => {
       state.isTokenThere = true;
     },
     setTokenIsNotThere: (state) => {
       state.isTokenThere = false;
+    },
+    updateUserData: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     }
   },
   extraReducers: (builder) => {
     builder
-      // Login
+      // Login - FIXED: Properly handle user data
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.message = "Knocking the door...";
@@ -63,9 +65,14 @@ const authSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         state.loggedIn = true;
-        state.isTokenThere = true; // ✅ Set token state on login
+        state.isTokenThere = true;
         state.message = "Welcome back!";
-        state.user = action.payload.user || state.user; // ✅ Handle user data properly
+        
+        // FIX: Properly merge user data with token
+        state.user = {
+          ...action.payload.user,
+          token: action.payload.token
+        };
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -73,10 +80,11 @@ const authSlice = createSlice({
         state.isSuccess = false;
         state.loggedIn = false;
         state.isTokenThere = false;
-        state.message = action.payload || "Something went wrong";
+        state.user = null;
+        state.message = action.payload?.message || "Something went wrong";
       })
 
-      // Register
+      // Register - FIXED: Handle user data properly
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
         state.message = "Creating your account...";
@@ -86,8 +94,14 @@ const authSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         state.loggedIn = true;
-        state.isTokenThere = true; // ✅ Set token state on register
+        state.isTokenThere = true;
         state.message = "Account created successfully!";
+        
+        // FIX: Set user data after registration
+        state.user = {
+          ...action.payload.user,
+          token: action.payload.token
+        };
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -95,10 +109,11 @@ const authSlice = createSlice({
         state.isSuccess = false;
         state.loggedIn = false;
         state.isTokenThere = false;
-        state.message = action.payload || "Something went wrong";
+        state.user = null;
+        state.message = action.payload?.message || "Something went wrong";
       })
 
-      // Get User + Profile
+      // Get User + Profile - FIXED: Handle user data properly
       .addCase(getUserAndProfile.pending, (state) => {
         state.isLoading = true;
       })
@@ -108,7 +123,14 @@ const authSlice = createSlice({
         state.profileFetched = true;
         state.loggedIn = true;
         state.isTokenThere = true;
-        state.user = action.payload.user;
+        
+        // FIX: Merge user data properly
+        if (action.payload.user) {
+          state.user = {
+            ...state.user,
+            ...action.payload.user
+          };
+        }
         state.message = "User profile fetched successfully";
       })
       .addCase(getUserAndProfile.rejected, (state, action) => {
@@ -116,7 +138,8 @@ const authSlice = createSlice({
         state.isError = true;
         state.loggedIn = false;
         state.isTokenThere = false;
-        state.message = action.payload || "Failed to fetch profile";
+        state.profileFetched = false;
+        state.message = action.payload?.message || "Failed to fetch profile";
       })
 
       // Get All Users
@@ -131,7 +154,7 @@ const authSlice = createSlice({
       .addCase(getAllUsers.rejected, (state, action) => {
         state.all_profiles_fetching = false;
         state.isError = true;
-        state.message = action.payload || "Failed to fetch users";
+        state.message = action.payload?.message || "Failed to fetch users";
       })
 
       // Get My Connection Requests
@@ -146,7 +169,7 @@ const authSlice = createSlice({
       .addCase(getMyConnectionRequests.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || "Failed to fetch connection requests";
+        state.message = action.payload?.message || "Failed to fetch connection requests";
       })
 
       // Get My Connections
@@ -161,7 +184,7 @@ const authSlice = createSlice({
       .addCase(whatAreMyConnections.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || "Failed to fetch connections";
+        state.message = action.payload?.message || "Failed to fetch connections";
       })
 
       // Get Sent Connection Requests
@@ -176,7 +199,7 @@ const authSlice = createSlice({
       .addCase(getSentConnectionRequests.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || "Failed to fetch sent requests";
+        state.message = action.payload?.message || "Failed to fetch sent requests";
       })
 
       // Accept Connection Request
@@ -188,7 +211,7 @@ const authSlice = createSlice({
       })
       .addCase(acceptConnectionRequest.rejected, (state, action) => {
         state.isError = true;
-        state.message = action.payload || "Failed to accept connection";
+        state.message = action.payload?.message || "Failed to accept connection";
       })
 
       // Reject Connection Request
@@ -200,7 +223,7 @@ const authSlice = createSlice({
       })
       .addCase(rejectConnectionRequest.rejected, (state, action) => {
         state.isError = true;
-        state.message = action.payload || "Failed to reject connection";
+        state.message = action.payload?.message || "Failed to reject connection";
       })
 
       // Remove Connection
@@ -213,7 +236,7 @@ const authSlice = createSlice({
       })
       .addCase(removeConnection.rejected, (state, action) => {
         state.isError = true;
-        state.message = action.payload || "Failed to remove connection";
+        state.message = action.payload?.message || "Failed to remove connection";
       })
 
       // Send Connection Request
@@ -222,10 +245,17 @@ const authSlice = createSlice({
       })
       .addCase(sendConnectionRequest.rejected, (state, action) => {
         state.isError = true;
-        state.message = action.payload || "Failed to send connection request";
+        state.message = action.payload?.message || "Failed to send connection request";
       });
   },
 });
 
-export const { reset, handleLoginUser, logout, setTokenIsNotThere, setTokenIsThere } = authSlice.actions;
+export const { 
+  reset, 
+  handleLoginUser, 
+  logout, 
+  setTokenIsNotThere, 
+  setTokenIsThere,
+  updateUserData 
+} = authSlice.actions;
 export default authSlice.reducer;

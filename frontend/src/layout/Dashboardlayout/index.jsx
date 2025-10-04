@@ -13,6 +13,11 @@ export default function DashboardLayout({ children }) {
     }
   }, [router]);
 
+  const handleCreatePost = () => {
+    // Open create post page in a new window
+    window.open('/create-post', '_blank', 'width=600,height=700,scrollbars=no,resizable=no');
+  };
+
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.homeContainer}>
@@ -33,6 +38,17 @@ export default function DashboardLayout({ children }) {
               <div className={styles.menuItem} onClick={() => router.push('/myConnections')}>
                 <span className={styles.menuIcon}>👥</span>
                 My Connections
+              </div>
+            </div>
+          </div>
+
+          {/* NEW: Create Section */}
+          <div className={styles.sidebarSection}>
+            <h3 className={styles.sidebarTitle}>Create</h3>
+            <div className={styles.sidebarMenu}>
+              <div className={styles.menuItem} onClick={handleCreatePost}>
+                <span className={styles.menuIcon}>📝</span>
+                Create Post
               </div>
             </div>
           </div>

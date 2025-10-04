@@ -1,28 +1,12 @@
 import mongoose from "mongoose";
-
-const CommentSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  body: {  // ✅ CHANGE TO 'body' to match comments.model.js
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
+import Comment from "../models/comments.model.js"; 
 const PostSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  body: {
+  body: {  // ✅ Change from 'text' to 'body' for consistency
     type: String,
     required: true,
   },
@@ -30,7 +14,10 @@ const PostSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
-  comments: [CommentSchema],
+  comments: [{  // ✅ Reference to standalone comments
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Comment",
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

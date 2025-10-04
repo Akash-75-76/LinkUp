@@ -1,230 +1,167 @@
-/* discover.module.css */
+/* pages/myConnections/myConnections.module.css */
 .container {
-  padding: 2rem;
+  padding: var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.loading, .error, .noUsers {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
-}
-
-.error {
-  color: #d93025;
-}
-
-.usersGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.userCard {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border: 1px solid #e1e8ed;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.userCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.userHeader {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 1rem;
-}
-
-.userAvatar {
-  flex-shrink: 0;
-}
-
-.avatarImage {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatarPlaceholder {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: #0073b1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.userInfo {
-  flex: 1;
-}
-
-.userName {
-  margin: 0 0 4px 0;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.userEmail, .userUsername {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.userUsername {
-  color: #0073b1;
-}
-
-.userActions {
-  display: flex;
-  gap: 8px;
-}
-
-.connectButton, .viewProfileButton {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.connectButton {
-  background: #0073b1;
-  color: white;
-}
-
-.connectButton:hover:not(:disabled) {
-  background: #005885;
-}
-
-.connectButton:disabled, .connectButton.sent {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.viewProfileButton {
-  background: #f0f2f5;
-  color: #333;
-}
-
-.viewProfileButton:hover {
-  background: #e4e6e9;
-}
-
-/* myConnections.module.css */
-.container {
-  padding: 2rem;
+.container h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--space-8);
 }
 
 .section {
-  margin-bottom: 3rem;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.section:last-child {
+  margin-bottom: 0;
 }
 
 .section h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
-  border-bottom: 2px solid #0073b1;
-  padding-bottom: 0.5rem;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--gray-100);
 }
 
-.requestsGrid, .connectionsGrid {
+.section > p {
+  color: var(--gray-500);
+  text-align: center;
+  padding: var(--space-8);
+  font-style: italic;
+}
+
+.requestsGrid,
+.connectionsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  gap: var(--space-4);
 }
 
-.requestCard, .connectionCard {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border: 1px solid #e1e8ed;
+.requestCard,
+.connectionCard {
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.requestCard:hover,
+.connectionCard:hover {
+  border-color: var(--primary-blue);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .userInfo {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 1rem;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .avatar {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid var(--gray-300);
 }
 
 .userInfo h4 {
-  margin: 0 0 4px 0;
-  color: #333;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-1);
 }
 
 .userInfo p {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
+  color: var(--gray-500);
+  font-size: var(--font-size-sm);
+  margin-bottom: 1px;
 }
 
-.requestActions, .connectionActions {
+.requestActions,
+.connectionActions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
-.acceptBtn, .rejectBtn, .removeBtn, .viewProfileBtn {
+.acceptBtn,
+.rejectBtn,
+.removeBtn,
+.viewProfileBtn {
   flex: 1;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
 }
 
 .acceptBtn {
-  background: #0073b1;
-  color: white;
+  background: var(--success);
+  color: var(--white);
 }
 
 .acceptBtn:hover {
-  background: #005885;
+  background: #059669;
+  transform: translateY(-1px);
 }
 
 .rejectBtn {
-  background: #f0f2f5;
-  color: #333;
+  background: var(--error);
+  color: var(--white);
 }
 
 .rejectBtn:hover {
-  background: #e4e6e9;
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
 .removeBtn {
-  background: #d93025;
-  color: white;
+  background: var(--gray-300);
+  color: var(--gray-700);
 }
 
 .removeBtn:hover {
-  background: #b71c1c;
+  background: var(--error);
+  color: var(--white);
 }
 
 .viewProfileBtn {
-  background: #f0f2f5;
-  color: #333;
+  background: transparent;
+  color: var(--primary-blue);
+  border: 1px solid var(--primary-blue);
 }
 
 .viewProfileBtn:hover {
-  background: #e4e6e9;
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4);
+  }
+  
+  .requestsGrid,
+  .connectionsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .requestActions,
+  .connectionActions {
+    flex-direction: column;
+  }
 }

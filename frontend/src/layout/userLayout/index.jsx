@@ -10,19 +10,30 @@ const UserLayout = ({children}) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    console.log('UserLayout token check:', token)
     
     if (token && !authState.profileFetched && !hasFetched) {
-      console.log('Dispatching getUserAndProfile with token')
+      console.log('Fetching user profile...')
       dispatch(getUserAndProfile({ token }))
-      setHasFetched(true)
+        .unwrap()
+        .then(() => {
+          setHasFetched(true)
+        })
+        .catch((error) => {
+          console.error('Failed to fetch profile:', error)
+          // Clear invalid token
+          localStorage.removeItem('token')
+          setHasFetched(true)
+        })
+    } else if (!token && hasFetched) {
+      // Token was removed, reset fetched state
+      setHasFetched(false)
     }
   }, [dispatch, authState.profileFetched, hasFetched])
 
   return (
     <div>
       <Navbar />
-      <main style={{ paddingTop: '100px' }}>
+      <main style={{ paddingTop: '70px', minHeight: 'calc(100vh - 70px)' }}>
         {children}
       </main>
     </div>

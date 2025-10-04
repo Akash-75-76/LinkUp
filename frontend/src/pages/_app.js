@@ -10,4 +10,4 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export default MyApp; // ✅ Make sure this is default export
+export default MyApp;

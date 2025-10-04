@@ -8,7 +8,8 @@ import {
   commentPost,
   get_comment_by_postId,
   delete_comment_of_user,
-  incrementLikes  // ✅ Add missing import
+  incrementLikes,
+  cleanupDatabase  // ✅ Add missing import
 } from "../controllers/post.controller.js";
 import multer from "multer";
 
@@ -26,6 +27,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Routes
+
+
+// Temporary cleanup route - REMOVE AFTER USE
+router.get('/cleanup', cleanupDatabase);
 router.get('/', activeCheck);
 router.post('/create_post', upload.single("media"), createPost);
 router.get('/all_posts', getAllPosts);

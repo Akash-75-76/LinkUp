@@ -1,19 +1,25 @@
-/* LoadingSpinner.module.css */
+/* Components/LoadingSpinner/LoadingSpinner.module.css */
 .spinnerContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: var(--space-8);
+  gap: var(--space-4);
 }
 
 .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #0073b1;
-  border-radius: 50%;
   width: 40px;
   height: 40px;
+  border: 4px solid var(--gray-200);
+  border-left: 4px solid var(--primary-blue);
+  border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.spinnerContainer p {
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
 }
 
 @keyframes spin {

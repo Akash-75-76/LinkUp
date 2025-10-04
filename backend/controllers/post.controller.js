@@ -1,13 +1,14 @@
 import Post from "../models/posts.model.js";
 import User from "../models/user.model.js";
+import Comment from "../models/comments.model.js";
 
 export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "Running" });
 };
 
-// FIX: Update createPost to match frontend data structure
+// FIXED: Create post with proper error handling
 export const createPost = async (req, res) => {
-  const { token, body } = req.body; // This should be form data
+  const { token, body } = req.body;
 
   try {
     const user = await User.findOne({ token });
@@ -15,35 +16,49 @@ export const createPost = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    if (!body || body.trim() === '') {
+      return res.status(400).json({ message: "Post content is required" });
+    }
+
     const newPost = new Post({
       userId: user._id,
-      body: body,
+      body: body.trim(),
       media: req.file ? req.file.filename : null,
       fileType: req.file ? req.file.mimetype.split("/")[0] : null,
     });
 
     await newPost.save();
+    
+    // Populate user data for frontend
+    await newPost.populate('userId', 'name username profilePicture');
+    
     return res.status(201).json({
       message: "Post created successfully",
       post: newPost,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Create post error:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Additional post functions you might need:
+// FIXED: Get all posts with proper population
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find({ active: true })
       .populate("userId", "name username profilePicture")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "userId",
+          select: "name username profilePicture"
+        }
+      })
       .sort({ createdAt: -1 });
 
-    console.log("All posts fetched:", posts.length);
     return res.status(200).json(posts);
   } catch (error) {
-    console.error(error);
+    console.error("Get all posts error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -62,15 +77,23 @@ export const getUserPosts = async (req, res) => {
       active: true,
     })
       .populate("userId", "name username profilePicture")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "userId",
+          select: "name username profilePicture"
+        }
+      })
       .sort({ createdAt: -1 });
 
-    console.log("User posts fetched:", posts.length);
     return res.status(200).json(posts);
   } catch (error) {
-    console.error(error);
+    console.error("Get user posts error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// FIXED: Delete post with proper validation
 export const deletePost = async (req, res) => {
   const { token, postId } = req.body;
 
@@ -82,84 +105,102 @@ export const deletePost = async (req, res) => {
 
     const post = await Post.findOne({ _id: postId, userId: user._id });
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ message: "Post not found or unauthorized" });
     }
 
-    // Soft delete by setting active to false
+    // Soft delete
     post.active = false;
     post.updatedAt = new Date();
     await post.save();
 
     return res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("Delete post error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// FIXED: Comment post with proper population
 export const commentPost = async (req, res) => {
   const { token, postId, comment } = req.body;
 
   try {
-    const user = await User.findOne({ token }).select("_id name username");
-
+    const user = await User.findOne({ token }).select("_id name username profilePicture");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const post = await Post.findOne({ _id: postId, active: true });
-    if (!post) {
+    if (!comment || comment.trim() === '') {
+      return res.status(400).json({ message: "Comment cannot be empty" });
+    }
+
+    // Verify post exists
+    const postExists = await Post.findById(postId);
+    if (!postExists) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // ✅ Fix: Use correct variable names and structure
-    const newComment = {
+    // Create comment
+    const newComment = new Comment({
       userId: user._id,
-      text: comment, // ✅ Use 'text' instead of 'comment'
-      createdAt: new Date(),
-    };
+      postId: postId,
+      body: comment.trim()
+    });
 
-    // ✅ Initialize comments array if it doesn't exist
-    if (!post.comments) {
-      post.comments = [];
-    }
+    await newComment.save();
 
-    post.comments.push(newComment);
-    await post.save();
+    // Add comment reference to post and populate properly
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $push: { comments: newComment._id }
+      },
+      { 
+        new: true 
+      }
+    )
+    .populate("userId", "name username profilePicture")
+    .populate({
+      path: "comments",
+      populate: {
+        path: "userId",
+        select: "name username profilePicture"
+      }
+    });
 
-    // Populate the comment with user info for response
-    const populatedPost = await Post.findById(post._id).populate(
-      "comments.userId",
-      "name username profilePicture"
-    );
+    // Populate the new comment for response
+    await newComment.populate('userId', 'name username profilePicture');
 
     return res.status(201).json({
       message: "Comment added successfully",
-      post: populatedPost,
+      comment: newComment,
+      post: updatedPost,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Comment error:", error);
+    return res.status(500).json({ 
+      message: "Internal server error",
+      error: error.message 
+    });
   }
 };
 
+// FIXED: Get comments with proper error handling
 export const get_comment_by_postId = async (req, res) => {
   const { postId } = req.params;
   try {
-    const post = await Post.findById(postId).populate(
-      "comments.userId",
-      "name username profilePicture"
-    );
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-    return res.status(200).json(post.comments);
+    const comments = await Comment.find({ postId: postId })
+      .populate("userId", "name username profilePicture")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(comments);
   } catch (error) {
-    console.error(error);
+    console.error("Get comments error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// FIXED: Delete comment with proper validation
 export const delete_comment_of_user = async (req, res) => {
   const { token, postId, commentId } = req.body;
   try {
@@ -167,26 +208,34 @@ export const delete_comment_of_user = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-    const comment = post.comments.id(commentId);
+
+    const comment = await Comment.findOne({ 
+      _id: commentId, 
+      postId: postId 
+    });
+    
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    if (comment.userId.toString() !== user._id.toString()) {
+
+    // Check if user owns the comment or is post owner
+    const post = await Post.findById(postId);
+    if (comment.userId.toString() !== user._id.toString() && 
+        post.userId.toString() !== user._id.toString()) {
       return res.status(403).json({ message: "Unauthorized" });
     }
-    comment.remove();
-    await post.save();
+
+    await Comment.findByIdAndDelete(commentId);
+    await Post.findByIdAndUpdate(postId, { $pull: { comments: commentId } });
+
     return res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("Delete comment error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// FIXED: Like/Unlike post with proper validation
 export const incrementLikes = async (req, res) => {
   const { token, postId } = req.body;
   try {
@@ -194,16 +243,16 @@ export const incrementLikes = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    
     const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
     
-    // ✅ Make it toggle functionality
     const userLiked = post.likes.includes(user._id);
     
     if (userLiked) {
-      // Unlike - remove user from likes
+      // Unlike
       post.likes.pull(user._id);
       await post.save();
       return res.status(200).json({ 
@@ -212,7 +261,7 @@ export const incrementLikes = async (req, res) => {
         likeCount: post.likes.length
       });
     } else {
-      // Like - add user to likes
+      // Like
       post.likes.push(user._id);
       await post.save();
       return res.status(200).json({ 
@@ -221,9 +270,26 @@ export const incrementLikes = async (req, res) => {
         likeCount: post.likes.length
       });
     }
-  }
-  catch (error) {
-    console.error(error);
+  } catch (error) {
+    console.error("Like post error:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const cleanupDatabase = async (req, res) => {
+  try {
+    const result = await Post.updateMany(
+      { "likes.0": { $type: "string" } },
+      { $set: { likes: [] } }
+    );
+    
+    console.log(`Cleaned ${result.modifiedCount} posts with corrupted likes`);
+    return res.status(200).json({ 
+      message: `Cleaned ${result.modifiedCount} posts with corrupted likes`,
+      cleaned: result.modifiedCount 
+    });
+  } catch (error) {
+    console.error("Cleanup error:", error);
+    return res.status(500).json({ message: "Cleanup failed" });
   }
 };

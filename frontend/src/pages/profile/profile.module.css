@@ -1,0 +1,331 @@
+/* profile.module.css */
+
+.profileContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* Profile Header */
+.profileHeader {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.coverPhoto {
+  height: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.profileInfo {
+  display: flex;
+  padding: 0 40px 40px;
+  margin-top: -60px;
+  align-items: flex-end;
+  gap: 30px;
+}
+
+.avatarSection {
+  position: relative;
+}
+
+.profileAvatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 6px solid white;
+  background: white;
+  object-fit: cover;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.profileDetails {
+  flex: 1;
+  padding-bottom: 20px;
+}
+
+.profileDetails h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.username {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0 0 16px 0;
+  font-weight: 500;
+}
+
+.bio {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #444;
+  margin: 0 0 12px 0;
+  max-width: 600px;
+}
+
+.currentPosition {
+  font-size: 1rem;
+  color: #0073b1;
+  font-weight: 500;
+  margin: 0 0 24px 0;
+}
+
+/* Profile Actions */
+.profileActions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.connectButton {
+  background: #0073b1;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.connectButton:hover:not(:disabled) {
+  background: #006097;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 115, 177, 0.3);
+}
+
+.connectButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.connectButton.connected {
+  background: #28a745;
+}
+
+.connectButton.connected:hover:not(:disabled) {
+  background: #218838;
+}
+
+.connectButton.requestSent {
+  background: #ffc107;
+  color: #000;
+}
+
+.connectButton.requestSent:hover:not(:disabled) {
+  background: #e0a800;
+}
+
+.downloadButton {
+  background: transparent;
+  color: #0073b1;
+  border: 2px solid #0073b1;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.downloadButton:hover {
+  background: #0073b1;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 115, 177, 0.3);
+}
+
+/* Profile Content */
+.profileContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+  color: #1a1a1a;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+/* Work Experience */
+.workItem, .educationItem {
+  padding: 20px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workItem:last-child, .educationItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.workItem h3, .educationItem h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.company, .school {
+  font-size: 1.1rem;
+  color: #0073b1;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+}
+
+.years, .field {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.noData {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 40px 20px;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: 16px;
+  }
+  
+  .profileInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px 30px;
+    margin-top: -80px;
+    gap: 20px;
+  }
+  
+  .profileAvatar {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profileDetails h1 {
+    font-size: 2rem;
+  }
+  
+  .profileContent {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .profileActions {
+    justify-content: center;
+  }
+  
+  .section {
+    padding: 24px;
+  }
+  
+  .coverPhoto {
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileInfo {
+    padding: 0 16px 24px;
+  }
+  
+  .profileDetails h1 {
+    font-size: 1.75rem;
+  }
+  
+  .profileActions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .connectButton, .downloadButton {
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .section {
+    padding: 20px;
+  }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Hover effects for interactive elements */
+.workItem, .educationItem {
+  transition: transform 0.2s ease;
+}
+
+.workItem:hover, .educationItem:hover {
+  transform: translateX(4px);
+}
+
+/* Custom scrollbar for the profile container */
+.profileContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profileContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.profileContainer::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.profileContainer::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

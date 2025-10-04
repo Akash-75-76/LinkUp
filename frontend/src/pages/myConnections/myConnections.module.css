@@ -1,0 +1,230 @@
+/* discover.module.css */
+.container {
+  padding: 2rem;
+}
+
+.loading, .error, .noUsers {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.error {
+  color: #d93025;
+}
+
+.usersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.userCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e1e8ed;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.userCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.userHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.userAvatar {
+  flex-shrink: 0;
+}
+
+.avatarImage {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #0073b1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.userName {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.userEmail, .userUsername {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.userUsername {
+  color: #0073b1;
+}
+
+.userActions {
+  display: flex;
+  gap: 8px;
+}
+
+.connectButton, .viewProfileButton {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.connectButton {
+  background: #0073b1;
+  color: white;
+}
+
+.connectButton:hover:not(:disabled) {
+  background: #005885;
+}
+
+.connectButton:disabled, .connectButton.sent {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.viewProfileButton {
+  background: #f0f2f5;
+  color: #333;
+}
+
+.viewProfileButton:hover {
+  background: #e4e6e9;
+}
+
+/* myConnections.module.css */
+.container {
+  padding: 2rem;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  border-bottom: 2px solid #0073b1;
+  padding-bottom: 0.5rem;
+}
+
+.requestsGrid, .connectionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.requestCard, .connectionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e1e8ed;
+}
+
+.userInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.userInfo h4 {
+  margin: 0 0 4px 0;
+  color: #333;
+}
+
+.userInfo p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.requestActions, .connectionActions {
+  display: flex;
+  gap: 8px;
+}
+
+.acceptBtn, .rejectBtn, .removeBtn, .viewProfileBtn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.acceptBtn {
+  background: #0073b1;
+  color: white;
+}
+
+.acceptBtn:hover {
+  background: #005885;
+}
+
+.rejectBtn {
+  background: #f0f2f5;
+  color: #333;
+}
+
+.rejectBtn:hover {
+  background: #e4e6e9;
+}
+
+.removeBtn {
+  background: #d93025;
+  color: white;
+}
+
+.removeBtn:hover {
+  background: #b71c1c;
+}
+
+.viewProfileBtn {
+  background: #f0f2f5;
+  color: #333;
+}
+
+.viewProfileBtn:hover {
+  background: #e4e6e9;
+}

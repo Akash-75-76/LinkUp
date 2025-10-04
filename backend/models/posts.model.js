@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
 
+const CommentSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  body: {  // ✅ CHANGE TO 'body' to match comments.model.js
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const PostSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -10,10 +26,11 @@ const PostSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  likes: {
-    type: Number,
-    default: 0,
-  },
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }],
+  comments: [CommentSchema],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -37,5 +54,4 @@ const PostSchema = new mongoose.Schema({
 });
 
 const Post = mongoose.model("Post", PostSchema);
-
 export default Post;

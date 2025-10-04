@@ -134,62 +134,48 @@ const postSlice = createSlice({
         state.message = action.payload;
       })
 
-      // Like Post
+      // Like Post - FIXED VERSION
       .addCase(likePost.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(likePost.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const { postId, liked, likeCount } = action.payload;
-        
-        // Update in all posts
-        const postIndex = state.posts.findIndex(post => post._id === postId);
-        if (postIndex !== -1) {
-          state.posts[postIndex].likes = liked 
-            ? [...state.posts[postIndex].likes, 'temp-user-id'] // You'll need to replace with actual user ID
-            : state.posts[postIndex].likes.filter(id => id !== 'temp-user-id');
-        }
-        
-        // Update in user posts
-        const userPostIndex = state.userPosts.findIndex(post => post._id === postId);
-        if (userPostIndex !== -1) {
-          state.userPosts[userPostIndex].likes = liked 
-            ? [...state.userPosts[userPostIndex].likes, 'temp-user-id']
-            : state.userPosts[userPostIndex].likes.filter(id => id !== 'temp-user-id');
-        }
-        
-        state.success = true;
-      })
-      .addCase(likePost.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
-      })
-
-      // Add Comment
-      .addCase(addComment.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-      })
-      .addCase(addComment.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const { post } = action.payload;
-        
-        // Update in all posts
-        const postIndex = state.posts.findIndex(p => p._id === post._id);
-        if (postIndex !== -1) {
-          state.posts[postIndex] = post;
-        }
-        
-        // Update in user posts
-        const userPostIndex = state.userPosts.findIndex(p => p._id === post._id);
-        if (userPostIndex !== -1) {
-          state.userPosts[userPostIndex] = post;
-        }
-        
-        state.message = "Comment added successfully";
-        state.success = true;
-      })
+    // Like Post - FIXED VERSION
+.addCase(likePost.fulfilled, (state, action) => {
+  state.isLoading = false;
+  const { postId, liked, likeCount, userId } = action.payload; // ✅ Get userId from payload
+  
+  // Update posts array
+  const postIndex = state.posts.findIndex(post => post._id === postId);
+  if (postIndex !== -1) {
+    if (liked) {
+      // Add user to likes if not already there
+      if (!state.posts[postIndex].likes.some(like => like.toString() === userId.toString())) {
+        state.posts[postIndex].likes.push(userId);
+      }
+    } else {
+      // Remove user from likes
+      state.posts[postIndex].likes = state.posts[postIndex].likes.filter(
+        like => like.toString() !== userId.toString()
+      );
+    }
+  }
+  
+  // Also update in userPosts array
+  const userPostIndex = state.userPosts.findIndex(post => post._id === postId);
+  if (userPostIndex !== -1) {
+    if (liked) {
+      if (!state.userPosts[userPostIndex].likes.some(like => like.toString() === userId.toString())) {
+        state.userPosts[userPostIndex].likes.push(userId);
+      }
+    } else {
+      state.userPosts[userPostIndex].likes = state.userPosts[userPostIndex].likes.filter(
+        like => like.toString() !== userId.toString()
+      );
+    }
+  }
+  
+  state.success = true;
+  state.message = action.payload.message;
+})
       .addCase(addComment.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;

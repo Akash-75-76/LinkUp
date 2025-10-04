@@ -5,8 +5,9 @@ export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "Running" });
 };
 
+// FIX: Update createPost to match frontend data structure
 export const createPost = async (req, res) => {
-  const { token, body } = req.body; // Get body from request body
+  const { token, body } = req.body; // This should be form data
 
   try {
     const user = await User.findOne({ token });
@@ -14,12 +15,11 @@ export const createPost = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Create new post with proper data
     const newPost = new Post({
       userId: user._id,
-      body: body, // Use the body from req.body
-      media: req.file ? req.file.filename : null, // Use null instead of empty string
-      fileType: req.file ? req.file.mimetype.split("/")[0] : null, // Use null instead of empty string
+      body: body,
+      media: req.file ? req.file.filename : null,
+      fileType: req.file ? req.file.mimetype.split("/")[0] : null,
     });
 
     await newPost.save();
@@ -40,6 +40,7 @@ export const getAllPosts = async (req, res) => {
       .populate("userId", "name username profilePicture")
       .sort({ createdAt: -1 });
 
+    console.log("All posts fetched:", posts.length);
     return res.status(200).json(posts);
   } catch (error) {
     console.error(error);
@@ -59,15 +60,17 @@ export const getUserPosts = async (req, res) => {
     const posts = await Post.find({
       userId: user._id,
       active: true,
-    }).sort({ createdAt: -1 });
+    })
+      .populate("userId", "name username profilePicture")
+      .sort({ createdAt: -1 });
 
+    console.log("User posts fetched:", posts.length);
     return res.status(200).json(posts);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 export const deletePost = async (req, res) => {
   const { token, postId } = req.body;
 

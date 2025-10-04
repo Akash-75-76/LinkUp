@@ -1,4 +1,3 @@
-// layout/DashboardLayout.js
 import React, { useEffect } from 'react';
 import styles from "./index.module.css";
 import { useRouter } from 'next/router';

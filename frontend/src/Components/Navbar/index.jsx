@@ -10,11 +10,11 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.auth);
 
-  // Debug logging
-  console.log('Navbar authState:', authState);
-  console.log('Logged in:', authState.loggedIn);
-  console.log('Profile fetched:', authState.profileFetched);
-  console.log('User:', authState.user);
+  // Debug logging (commented out for production)
+  // console.log('Navbar authState:', authState);
+  // console.log('Logged in:', authState.loggedIn);
+  // console.log('Profile fetched:', authState.profileFetched);
+  // console.log('User:', authState.user);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -56,7 +56,7 @@ const Navbar = () => {
                 Login
               </div>
               <div 
-                onClick={() => router.push("/register")}  // Changed to register
+                onClick={() => router.push("/register")}
                 className={styles.buttonJoin}
               >
                 Join Now

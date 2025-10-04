@@ -1,6 +1,5 @@
-import  {clientServer} from '@/config';
+import { clientServer } from '@/config';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-
 
 // Get all posts
 export const getAllPosts = createAsyncThunk(
@@ -78,16 +77,18 @@ export const deletePost = createAsyncThunk(
 );
 
 // Like/Unlike post
+// Like/Unlike post - FIXED VERSION
 export const likePost = createAsyncThunk(
   'post/likePost',
-  async ({ token, postId }, { rejectWithValue }) => {
+  async ({ token, postId, userId }, { rejectWithValue }) => { // ✅ Add userId parameter
     try {
       const response = await clientServer.post('/posts/like', { token, postId });
       return { 
         postId, 
         liked: response.data.liked,
         likeCount: response.data.likeCount,
-        message: response.data.message
+        message: response.data.message,
+        userId // ✅ Return userId for reducer
       };
     } catch (error) {
       return rejectWithValue(
@@ -96,7 +97,6 @@ export const likePost = createAsyncThunk(
     }
   }
 );
-
 // Add comment
 export const addComment = createAsyncThunk(
   'post/addComment',

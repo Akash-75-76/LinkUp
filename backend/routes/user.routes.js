@@ -11,7 +11,11 @@ import {
   sendConnectionRequest,
   getMyConnectionRequests,
   whatAreMyConnections,
-  getSentConnectionRequests
+  getSentConnectionRequests,
+  acceptConnectionRequest,
+  rejectConnectionRequest,
+  removeConnection,
+  getUserProfileById  // Add this import
 } from "../controllers/user.controller.js";
 import multer from "multer";
 
@@ -42,17 +46,20 @@ router.route("/login").post(login);
 // User profile routes
 router.route("/user_update").post(updateUserProfile);
 router.route("/getUserAndProfile").get(getUserAndProfile);
-
 router.route("/update_profile_data").post(updateProfileData);
 
 // User data routes
 router.route("/all").get(getAllUsers);
 router.get('/download_profile', downloadProfile);
+router.get('/profile/:userId', getUserProfileById); // Use controller function
 
 // Connection routes
 router.post("/send_connection_request", sendConnectionRequest);
 router.get("/my_connection_requests", getMyConnectionRequests);
 router.get("/my_connections", whatAreMyConnections);
 router.get("/sent_connection_requests", getSentConnectionRequests);
+router.post("/accept_connection", acceptConnectionRequest);
+router.post("/reject_connection", rejectConnectionRequest);
+router.post("/remove_connection", removeConnection);
 
 export default router;

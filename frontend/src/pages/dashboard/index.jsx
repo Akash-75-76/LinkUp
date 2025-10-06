@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllPosts } from '@/config/redux/action/postAction';
 import UserLayout from '@/layout/userLayout';
-import DashboardLayout from '@/layout/DashboardLayout';
+import DashboardLayout from "../../layout/Dashboardlayout/index"
 import PostFeed from '@/Components/PostFeed';
 import People from '@mui/icons-material/People';
 import Email from '@mui/icons-material/Email';

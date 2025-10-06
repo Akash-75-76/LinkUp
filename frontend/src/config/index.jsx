@@ -5,5 +5,5 @@ export const clientServer = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000, // ✅ Add timeout to prevent hanging requests
+  // ✅ Add timeout to prevent hanging requests
 });

@@ -293,3 +293,62 @@ export const cleanupDatabase = async (req, res) => {
     return res.status(500).json({ message: "Cleanup failed" });
   }
 };
+// Get posts count for a specific user
+export const getUserPostsCount = async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const postsCount = await Post.countDocuments({
+      userId: userId,
+      active: true
+    });
+
+    return res.status(200).json({
+      count: postsCount,
+      userId: userId
+    });
+  } catch (error) {
+    console.error("Get user posts count error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+// Get posts count for multiple users
+export const getUsersPostsCount = async (req, res) => {
+  const { userIds } = req.body; // Array of user IDs
+
+  try {
+    if (!userIds || !Array.isArray(userIds)) {
+      return res.status(400).json({ message: "User IDs array is required" });
+    }
+
+    const counts = await Post.aggregate([
+      {
+        $match: {
+          userId: { $in: userIds.map(id => new mongoose.Types.ObjectId(id)) },
+          active: true
+        }
+      },
+      {
+        $group: {
+          _id: "$userId",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Convert to object for easy access
+    const countsMap = {};
+    counts.forEach(item => {
+      countsMap[item._id.toString()] = item.count;
+    });
+
+    return res.status(200).json(countsMap);
+  } catch (error) {
+    console.error("Get users posts count error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

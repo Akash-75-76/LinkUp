@@ -1,9 +1,12 @@
-import React from 'react'
-import styles from "./styles.module.css"
-import { useRouter } from 'next/router'
-import { useSelector } from 'react-redux';
+import React from 'react';
+import styles from "./styles.module.css";
+import { useRouter } from 'next/router';
+import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '@/config/redux/reducer/authreducer';
-import { useDispatch } from 'react-redux';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import Dashboard from '@mui/icons-material/Dashboard';
+import ExitToApp from '@mui/icons-material/ExitToApp';
+import LinkIcon from '@mui/icons-material/Link';
 
 const Navbar = () => {
   const router = useRouter();
@@ -17,60 +20,81 @@ const Navbar = () => {
 
   const handleViewProfile = () => {
     if (authState.user?._id) {
-      window.open(`/profile/${authState.user._id}`, '_blank');
+      router.push(`/profile/${authState.user._id}`);
     } else {
-      console.error('User ID not available');
-      // Optional: redirect to current user's profile page without ID
       router.push('/profile');
     }
+  };
+
+  const handleNavigation = (path) => {
+    router.push(path);
   };
 
   return (
     <div className={styles.container}>
       <nav className={styles.navbar}>
-        <h1 onClick={() => router.push("/")}>
-          LinkUP
-        </h1>
+        <div className={styles.navbarContent}>
+          <div 
+            className={styles.logo}
+            onClick={() => handleNavigation("/")}
+          >
+            <LinkIcon className={styles.logoIcon} />
+            <h1>LinkUP</h1>
+          </div>
 
-        <div className={styles.navBarOptionContainer}>
-          {authState.loggedIn && authState.profileFetched ? (
-            <div className={styles.userMenu}>
-              <span className={styles.welcomeText}>
-                Hey {authState.user?.name || 'User'}
-              </span>
-              <div 
-                onClick={handleViewProfile}
-                className={styles.profileButton}
-              >
-                View Profile
+          <div className={styles.navBarOptionContainer}>
+            {authState.loggedIn && authState.profileFetched ? (
+              <div className={styles.userMenu}>
+                <div className={styles.userInfo}>
+                  <span className={styles.welcomeText}>
+                    Welcome back, <strong>{authState.user?.name || 'User'}</strong>
+                  </span>
+                </div>
+                <div className={styles.menuButtons}>
+                  <button 
+                    onClick={handleViewProfile}
+                    className={styles.profileButton}
+                  >
+                    <AccountCircle className={styles.buttonIcon} />
+                    My Profile
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation("/dashboard")}
+                    className={styles.dashboardButton}
+                  >
+                    <Dashboard className={styles.buttonIcon} />
+                    Dashboard
+                  </button>
+                  <button 
+                    onClick={handleLogout} 
+                    className={styles.logoutButton}
+                  >
+                    <ExitToApp className={styles.buttonIcon} />
+                    Logout
+                  </button>
+                </div>
               </div>
-              <div 
-                onClick={handleLogout} 
-                className={styles.logoutButton}
-              >
-                Logout
+            ) : (
+              <div className={styles.authButtons}>
+                <button 
+                  onClick={() => handleNavigation("/login")} 
+                  className={styles.loginButton}
+                >
+                  Sign In
+                </button>
+                <button 
+                  onClick={() => handleNavigation("/register")}
+                  className={styles.buttonJoin}
+                >
+                  Join Now
+                </button>
               </div>
-            </div>
-          ) : (
-            <div className={styles.authButtons}>
-              <div 
-                onClick={() => router.push("/login")} 
-                className={styles.loginButton}
-              >
-                Login
-              </div>
-              <div 
-                onClick={() => router.push("/register")}
-                className={styles.buttonJoin}
-              >
-                Join Now
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </nav>
     </div>
-  )
-}
+  );
+};
 
 export default Navbar;

@@ -4,6 +4,8 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import postRoutes from './routes/post.routes.js';
 import userRoutes from './routes/user.routes.js';
+import chatRoutes from './routes/chat.routes.js'; // Add this line
+import userStatusRoutes from './routes/userStatus.routes.js'; // Add this line
 dotenv.config();
 
 const app = express();
@@ -31,8 +33,11 @@ app.get('/', (req, res) => {
 
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/user-status', userStatusRoutes); // Add this
 app.use('/uploads', express.static('uploads'));
-// 404 Handler - REMOVED THE PROBLEMATIC WILDCARD
+
+// 404 Handler
 app.use((req, res, next) => {
   res.status(404).json({ 
     success: false,

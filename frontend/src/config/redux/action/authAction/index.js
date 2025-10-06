@@ -28,25 +28,64 @@ export const registerUser = createAsyncThunk(
   'user/register',
   async (user, thunkAPI) => {
     try {
-      console.log("Register request payload:", user);
-      const response = await clientServer.post('/users/register', {
-        username: user.username,
-        password: user.password,
-        email: user.email,
+      console.log("=== AUTH ACTION DEBUG: DATA RECEIVED ===");
+      console.log("User object received:", {
         name: user.name,
+        username: user.username,
+        email: user.email,
+        bio: user.bio,
+        currentPost: user.currentPost,
+        profilePicture: user.profilePicture ? "File present" : "No file",
+        education: user.education,
+        pastWork: user.pastWork
       });
-      console.log("Register response:", response.data);
+      console.log("=== END AUTH ACTION DEBUG ===");
+      
+      // ✅ SIMPLIFIED: Use regular JSON for now, we'll add file upload separately
+      const response = await clientServer.post('/users/register', {
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+        bio: user.bio || "",
+        currentPost: user.currentPost || "",
+        education: user.education || [],
+        pastWork: user.pastWork || []
+        // We'll handle profile picture separately after registration
+      });
+      
+      console.log("Register API response:", response.data);
+      
+      // ✅ NEW: If we have a profile picture, upload it separately after registration
+      if (user.profilePicture && response.data.token) {
+        console.log("Uploading profile picture separately...");
+        try {
+          const profileFormData = new FormData();
+          profileFormData.append('profile_pic', user.profilePicture);
+          profileFormData.append('token', response.data.token);
+          
+          await clientServer.post('/users/update_profile_pic', profileFormData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          console.log("Profile picture uploaded successfully");
+        } catch (uploadError) {
+          console.error("Profile picture upload failed:", uploadError);
+          // Continue without profile picture - it's optional
+        }
+      }
+      
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
-      return response.data; // ✅ Return full response data instead of just token
+      return response.data;
     } catch (error) {
       console.error("Register error:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
   }
 );
-
 export const getUserAndProfile = createAsyncThunk(
   'user/getUserAndProfile',
   async ({ token }, { rejectWithValue }) => {

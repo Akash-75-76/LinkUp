@@ -2,6 +2,10 @@ import React, { useEffect } from 'react';
 import styles from "./index.module.css";
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
+import Dashboard from '@mui/icons-material/Dashboard';
+import Search from '@mui/icons-material/Search';
+import People from '@mui/icons-material/People';
+import Create from '@mui/icons-material/Create';
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -14,9 +18,18 @@ export default function DashboardLayout({ children }) {
   }, [router]);
 
   const handleCreatePost = () => {
-    // Open create post page in a new window
-    window.open('/create-post', '_blank', 'width=600,height=700,scrollbars=no,resizable=no');
+    router.push('/create-post');
   };
+
+  const navigationItems = [
+    { path: '/dashboard', icon: <Dashboard className={styles.menuIcon} />, label: 'Dashboard' },
+    { path: '/discover', icon: <Search className={styles.menuIcon} />, label: 'Discover' },
+    { path: '/myConnections', icon: <People className={styles.menuIcon} />, label: 'My Connections' },
+  ];
+
+  const createItems = [
+    { action: handleCreatePost, icon: <Create className={styles.menuIcon} />, label: 'Create Post' },
+  ];
 
   return (
     <div className={styles.dashboardContainer}>
@@ -24,45 +37,55 @@ export default function DashboardLayout({ children }) {
         
         {/* Left Sidebar */}
         <div className={styles.leftSidebar}>
-          <div className={styles.sidebarSection}>
-            <h3 className={styles.sidebarTitle}>Navigation</h3>
-            <div className={styles.sidebarMenu}>
-              <div className={styles.menuItem} onClick={() => router.push('/dashboard')}>
-                <span className={styles.menuIcon}>📊</span>
-                Dashboard
-              </div>
-              <div className={styles.menuItem} onClick={() => router.push('/discover')}>
-                <span className={styles.menuIcon}>🔍</span>
-                Discover
-              </div>
-              <div className={styles.menuItem} onClick={() => router.push('/myConnections')}>
-                <span className={styles.menuIcon}>👥</span>
-                My Connections
-              </div>
-            </div>
-          </div>
-
-          {/* NEW: Create Section */}
-          <div className={styles.sidebarSection}>
-            <h3 className={styles.sidebarTitle}>Create</h3>
-            <div className={styles.sidebarMenu}>
-              <div className={styles.menuItem} onClick={handleCreatePost}>
-                <span className={styles.menuIcon}>📝</span>
-                Create Post
+          <div className={styles.sidebarContent}>
+            {/* Navigation Section */}
+            <div className={styles.sidebarSection}>
+              <h3 className={styles.sidebarTitle}>Navigation</h3>
+              <div className={styles.sidebarMenu}>
+                {navigationItems.map((item, index) => (
+                  <div 
+                    key={index}
+                    className={`${styles.menuItem} ${
+                      router.pathname === item.path ? styles.active : ''
+                    }`}
+                    onClick={() => router.push(item.path)}
+                  >
+                    {item.icon}
+                    <span className={styles.menuLabel}>{item.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          <div className={styles.sidebarSection}>
-            <h3 className={styles.sidebarTitle}>Quick Access</h3>
-            <div className={styles.sidebarMenu}>
-              <div className={styles.menuItem} onClick={() => router.push('/scroll')}>
-                <span className={styles.menuIcon}>📜</span>
-                Scroll
+            {/* Create Section */}
+            <div className={styles.sidebarSection}>
+              <h3 className={styles.sidebarTitle}>Create</h3>
+              <div className={styles.sidebarMenu}>
+                {createItems.map((item, index) => (
+                  <div 
+                    key={index}
+                    className={styles.menuItem}
+                    onClick={item.action}
+                  >
+                    {item.icon}
+                    <span className={styles.menuLabel}>{item.label}</span>
+                  </div>
+                ))}
               </div>
-              <div className={styles.menuItem} onClick={() => router.push('/top-profiles')}>
-                <span className={styles.menuIcon}>⭐</span>
-                Top Profiles
+            </div>
+
+            {/* Quick Stats Section */}
+            <div className={styles.sidebarSection}>
+              <h3 className={styles.sidebarTitle}>Quick Access</h3>
+              <div className={styles.quickStats}>
+                <div className={styles.statItem}>
+                  <span className={styles.statNumber}>0</span>
+                  <span className={styles.statLabel}>Pending</span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statNumber}>0</span>
+                  <span className={styles.statLabel}>Messages</span>
+                </div>
               </div>
             </div>
           </div>
@@ -71,49 +94,6 @@ export default function DashboardLayout({ children }) {
         {/* Main Content */}
         <div className={styles.mainContent}>
           {children}
-        </div>
-
-        {/* Right Sidebar */}
-        <div className={styles.rightSidebar}>
-          <div className={styles.sidebarSection}>
-            <h3 className={styles.sidebarTitle}>Trending</h3>
-            <div className={styles.trendingList}>
-              <div className={styles.trendingItem}>
-                <span className={styles.trendingBadge}>1</span>
-                <span>Web Development</span>
-              </div>
-              <div className={styles.trendingItem}>
-                <span className={styles.trendingBadge}>2</span>
-                <span>AI & ML</span>
-              </div>
-              <div className={styles.trendingItem}>
-                <span className={styles.trendingBadge}>3</span>
-                <span>UI/UX Design</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.sidebarSection}>
-            <h3 className={styles.sidebarTitle}>Suggested Profiles</h3>
-            <div className={styles.suggestedList}>
-              <div className={styles.profileCard}>
-                <div className={styles.profileAvatar}>JD</div>
-                <div className={styles.profileInfo}>
-                  <div className={styles.profileName}>John Doe</div>
-                  <div className={styles.profileTitle}>Frontend Developer</div>
-                </div>
-                <button className={styles.connectBtn}>Connect</button>
-              </div>
-              <div className={styles.profileCard}>
-                <div className={styles.profileAvatar}>SJ</div>
-                <div className={styles.profileInfo}>
-                  <div className={styles.profileName}>Sarah Johnson</div>
-                  <div className={styles.profileTitle}>UI Designer</div>
-                </div>
-                <button className={styles.connectBtn}>Connect</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -31,6 +31,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  lastSeen: {
+    type: Date,
+    default: Date.now
+  },
+  isOnline: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const User = mongoose.model("User", UserSchema);

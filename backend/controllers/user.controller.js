@@ -6,7 +6,7 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 import ConnectionRequest from "../models/connections.model.js";
-
+import Follow from "../models/follow.model.js";
 const convertUserDataTOPDF = async (userProfile) => {
   const doc = new PDFDocument();
   const outputPath = crypto.randomBytes(32).toString("hex") + ".pdf";
@@ -46,8 +46,36 @@ const convertUserDataTOPDF = async (userProfile) => {
 
 export const register = async (req, res) => {
   try {
+    console.log("=== BACKEND DEBUG: REQUEST RECEIVED ===");
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+    console.log("=== END BACKEND DEBUG ===");
+
+    if (!req.body) {
+      return res.status(400).json({ message: "No data received" });
+    }
+
     const { name, username, email, password, bio, currentPost, education, pastWork } = req.body;
     
+    // ✅ FIX: Remove JSON parsing - use arrays directly
+    console.log("Education received:", education);
+    console.log("Past Work received:", pastWork);
+    console.log("Education type:", typeof education);
+    console.log("Past Work type:", typeof pastWork);
+
+    // ✅ FIX: Handle file upload separately (since you're not using FormData for registration)
+    const profilePicture = "default.jpg"; // Default for now, you handle separately
+
+    console.log("=== BACKEND DEBUG: PARSED DATA ===");
+    console.log("Basic info:", { name, username, email });
+    console.log("Profile info:", { bio, currentPost });
+    console.log("Education:", education);
+    console.log("Education length:", education ? education.length : 0);
+    console.log("Past Work:", pastWork);
+    console.log("Past Work length:", pastWork ? pastWork.length : 0);
+    console.log("=== END BACKEND DEBUG ===");
+
+    // Validation
     if (!name || !username || !email || !password) {
       return res.status(400).json({ message: "All required fields are missing" });
     }
@@ -63,17 +91,25 @@ export const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      profilePicture: profilePicture,
     });
     await newUser.save();
 
     // Create profile with all the data
-    const profile = new Profile({ 
+    const profileData = {
       userId: newUser._id,
       bio: bio || "",
       currentPost: currentPost || "",
+      // ✅ FIX: Use arrays directly
       education: education || [],
       pastWork: pastWork || []
-    });
+    };
+
+    console.log("=== BACKEND DEBUG: FINAL PROFILE DATA ===");
+    console.log("Profile data being saved:", profileData);
+    console.log("=== END BACKEND DEBUG ===");
+
+    const profile = new Profile(profileData);
     await profile.save();
     
     const token = crypto.randomBytes(32).toString("hex");
@@ -91,6 +127,7 @@ export const register = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error("Registration error:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -145,6 +182,11 @@ export const uploadProfilePic = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    console.log("Profile picture upload:", {
+      userId: user._id,
+      filename: req.file.filename
+    });
+
     // Update user profile picture
     user.profilePicture = req.file.filename;
     await user.save();
@@ -154,6 +196,7 @@ export const uploadProfilePic = async (req, res) => {
       profilePicture: req.file.filename 
     });
   } catch (error) {
+    console.error("Profile picture upload error:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -324,6 +367,7 @@ export const downloadProfile = async (req, res) => {
 };
 
 
+// In sendConnectionRequest - Add better error handling
 export const sendConnectionRequest = async (req, res) => {
   const { token, connectionId } = req.body;
   
@@ -344,17 +388,21 @@ export const sendConnectionRequest = async (req, res) => {
       return res.status(404).json({ message: "User to connect not found" });
     }
     
-    // ✅ Use correct field names that match your schema
-    const existingRequest = await ConnectionRequest.findOne({ 
-      userId: user._id, 
-      connectionId: connectionId 
+    // Check if request already exists in either direction
+    const existingRequest = await ConnectionRequest.findOne({
+      $or: [
+        { userId: user._id, connectionId: connectionId },
+        { userId: connectionId, connectionId: user._id }
+      ]
     });
     
     if (existingRequest) {
-      return res.status(400).json({ message: "Connection request already sent" });
+      return res.status(400).json({ 
+        message: "Connection request already exists",
+        existingRequest 
+      });
     }
 
-    // ✅ Use schema field names (userId, connectionId)
     const request = new ConnectionRequest({
       userId: user._id,
       connectionId: connectionId
@@ -362,7 +410,10 @@ export const sendConnectionRequest = async (req, res) => {
     
     await request.save();
 
-    return res.status(200).json({ message: "Connection request sent successfully" });
+    return res.status(200).json({ 
+      message: "Connection request sent successfully",
+      requestId: request._id 
+    });
     
   } catch (error) {
     console.error("Error sending connection request:", error);
@@ -426,10 +477,13 @@ export const getSentConnectionRequests = async (req, res) => {
     // Get requests sent BY the current user
     const sentRequests = await ConnectionRequest.find({ 
       userId: user._id 
-    }).populate('connectionId', 'name username email profilePicture');
+    })
+    .populate('connectionId', 'name username email profilePicture')
+    .sort({ createdAt: -1 });
     
     return res.status(200).json(sentRequests);
   } catch (error) {
+    console.error("Error fetching sent requests:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -517,16 +571,169 @@ export const getUserProfileById = async (req, res) => {
   try {
     const { userId } = req.params;
     
+    console.log("Fetching profile for user ID:", userId); // Debug log
+
+    // First, try to find the profile with populated user data
     const profile = await Profile.findOne({ userId })
       .populate('userId', 'name username email profilePicture');
     
     if (!profile) {
+      console.log("Profile not found for user ID:", userId);
       return res.status(404).json({ message: "Profile not found" });
     }
+
+    console.log("Profile found:", {
+      hasUserId: !!profile.userId,
+      userId: profile.userId?._id,
+      name: profile.userId?.name,
+      bio: profile.bio,
+      education: profile.education,
+      pastWork: profile.pastWork
+    }); // Debug log
 
     res.status(200).json(profile);
   } catch (error) {
     console.error("Error fetching profile:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const followUser = async (req, res) => {
+  const { token, followingId } = req.body;
+
+  try {
+    const follower = await User.findOne({ token });
+    if (!follower) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prevent self-follow
+    if (follower._id.toString() === followingId) {
+      return res.status(400).json({ message: "Cannot follow yourself" });
+    }
+
+    // Check if already following
+    const existingFollow = await Follow.findOne({
+      followerId: follower._id,
+      followingId: followingId
+    });
+
+    if (existingFollow) {
+      return res.status(400).json({ message: "Already following this user" });
+    }
+
+    // Create follow relationship
+    const follow = new Follow({
+      followerId: follower._id,
+      followingId: followingId
+    });
+
+    await follow.save();
+
+    return res.status(201).json({ 
+      message: "Successfully followed user",
+      follow 
+    });
+  } catch (error) {
+    console.error("Follow user error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Unfollow a user
+export const unfollowUser = async (req, res) => {
+  const { token, followingId } = req.body;
+
+  try {
+    const follower = await User.findOne({ token });
+    if (!follower) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const result = await Follow.findOneAndDelete({
+      followerId: follower._id,
+      followingId: followingId
+    });
+
+    if (!result) {
+      return res.status(404).json({ message: "Not following this user" });
+    }
+
+    return res.status(200).json({ message: "Successfully unfollowed user" });
+  } catch (error) {
+    console.error("Unfollow user error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get following count
+export const getFollowingCount = async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const followingCount = await Follow.countDocuments({
+      followerId: userId
+    });
+
+    return res.status(200).json({
+      count: followingCount,
+      userId: userId
+    });
+  } catch (error) {
+    console.error("Get following count error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get followers count
+export const getFollowersCount = async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const followersCount = await Follow.countDocuments({
+      followingId: userId
+    });
+
+    return res.status(200).json({
+      count: followersCount,
+      userId: userId
+    });
+  } catch (error) {
+    console.error("Get followers count error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Check if current user is following another user
+export const checkIfFollowing = async (req, res) => {
+  const { token, targetUserId } = req.query;
+
+  try {
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isFollowing = await Follow.findOne({
+      followerId: user._id,
+      followingId: targetUserId
+    });
+
+    return res.status(200).json({
+      isFollowing: !!isFollowing,
+      followerId: user._id,
+      followingId: targetUserId
+    });
+  } catch (error) {
+    console.error("Check following error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

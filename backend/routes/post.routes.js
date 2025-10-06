@@ -9,7 +9,10 @@ import {
   get_comment_by_postId,
   delete_comment_of_user,
   incrementLikes,
-  cleanupDatabase  // ✅ Add missing import
+  cleanupDatabase,
+  getUserPostsCount,
+  getUsersPostsCount
+
 } from "../controllers/post.controller.js";
 import multer from "multer";
 
@@ -40,5 +43,6 @@ router.post('/comment', commentPost);  // ✅ Fixed route name consistency
 router.get('/comments/:postId', get_comment_by_postId);  // ✅ Add comment routes
 router.delete('/delete_comment', delete_comment_of_user);  // ✅ Add comment routes
 router.post('/like', incrementLikes);  // ✅ Fixed route name
-
+router.get('/user_posts_count', getUserPostsCount);
+router.post('/users_posts_count', getUsersPostsCount);
 export default router;  // ✅ Fixed export syntax

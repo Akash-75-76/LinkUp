@@ -1,239 +1,565 @@
-/* pages/profile/profile.module.css */
 .profileContainer {
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: var(--space-6);
+  padding: 20px;
+  min-height: calc(100vh - 80px);
 }
 
-.loading,
-.error {
-  text-align: center;
-  padding: var(--space-16);
-  color: var(--gray-600);
-  font-size: var(--font-size-lg);
-}
-
-.error {
-  color: var(--error);
-}
-
+/* Profile Header - Compact */
 .profileHeader {
-  background: var(--white);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  margin-bottom: var(--space-6);
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 16px;
 }
 
-.coverPhoto {
-  height: 200px;
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-dark) 100%);
-  position: relative;
-}
-
-.profileInfo {
-  padding: 0 var(--space-8) var(--space-8);
-  margin-top: -60px;
+.profileMain {
   display: flex;
-  gap: var(--space-8);
-  align-items: flex-end;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .avatarSection {
   flex-shrink: 0;
+  position: relative;
 }
 
 .profileAvatar {
-  width: 160px;
-  height: 160px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 6px solid var(--white);
-  box-shadow: var(--shadow-lg);
-  background: var(--gray-200);
+  border: 4px solid #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.statusDot {
+  font-size: 0.8rem !important;
+  margin-right: 6px;
+}
+
+.statusDot.connected {
+  color: #28a745;
+}
+
+.statusDot.pending {
+  color: #ffc107;
+}
+
+.statusDot.notConnected {
+  color: #6c757d;
 }
 
 .profileDetails {
   flex: 1;
-  padding-bottom: var(--space-4);
+  min-width: 0;
 }
 
-.profileDetails h1 {
-  font-size: var(--font-size-3xl);
+.profileHeaderInfo h1 {
+  font-size: 1.8rem;
   font-weight: 700;
-  color: var(--gray-900);
-  margin-bottom: var(--space-2);
+  color: #2c3e50;
+  margin: 0 0 4px 0;
 }
 
 .username {
-  color: var(--primary-blue);
-  font-size: var(--font-size-lg);
+  color: #0077b5;
   font-weight: 500;
-  margin-bottom: var(--space-4);
-}
-
-.bio,
-.currentPosition {
-  color: var(--gray-600);
-  margin-bottom: var(--space-3);
-  line-height: 1.6;
-  font-size: var(--font-size-base);
+  margin: 0 0 8px 0;
+  font-size: 1rem;
 }
 
 .currentPosition {
+  color: #666;
+  font-size: 1rem;
+  margin: 0 0 12px 0;
   font-weight: 500;
-  color: var(--gray-700);
 }
 
+.bio {
+  color: #555;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+}
+
+/* Profile Stats - Compact */
+.profileStats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat {
+  text-align: center;
+  flex: 1;
+}
+
+.statIcon {
+  font-size: 1.2rem !important;
+  color: #0077b5;
+  margin-bottom: 4px;
+}
+
+.statNumber {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 2px;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Profile Actions */
 .profileActions {
   display: flex;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .connectButton,
-.downloadButton {
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-lg);
+.downloadButton,
+.messageButton {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: var(--font-size-base);
-  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .connectButton {
-  background: var(--primary-blue);
-  color: var(--white);
+  background: #0077b5;
+  color: white;
 }
 
 .connectButton:hover:not(:disabled) {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
+  background: #0056a4;
 }
 
 .connectButton:disabled {
-  background: var(--gray-400);
+  background: #ccc;
   cursor: not-allowed;
 }
 
 .connectButton.connected {
-  background: var(--success);
+  background: #28a745;
 }
 
 .connectButton.requestSent {
-  background: var(--warning);
+  background: #ffc107;
+  color: #000;
 }
 
 .downloadButton {
   background: transparent;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
+  color: #0077b5;
+  border: 1px solid #0077b5;
 }
 
 .downloadButton:hover {
-  background: var(--gray-100);
-  border-color: var(--gray-400);
+  background: #0077b5;
+  color: white;
 }
 
+.messageButton {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.messageButton:hover {
+  background: #f8f9fa;
+}
+
+/* Profile Navigation */
+.profileNavigation {
+  display: flex;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.navItem {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.navItem:hover {
+  background: #f8f9fa;
+  color: #0077b5;
+}
+
+.navItem.active {
+  background: #0077b5;
+  color: white;
+}
+
+.navIcon {
+  font-size: 1.1rem !important;
+}
+
+/* Profile Content */
 .profileContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  min-height: 200px;
 }
 
-.section {
-  background: var(--white);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-6);
+.tabContent h3 {
+  color: #2c3e50;
+  margin-bottom: 16px;
+  font-size: 1.3rem;
 }
 
-.section h2 {
-  font-size: var(--font-size-xl);
+.tabContent h4 {
+  color: #2c3e50;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+/* About Section */
+.aboutText {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.contactInfo {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.contactIcon {
+  font-size: 1.1rem !important;
+  color: #666;
+}
+
+.contactLabel {
   font-weight: 600;
-  color: var(--gray-900);
-  margin-bottom: var(--space-4);
-  padding-bottom: var(--space-3);
-  border-bottom: 2px solid var(--gray-100);
+  color: #333;
+  min-width: 100px;
 }
 
-.workItem,
+.contactValue {
+  color: #555;
+}
+
+/* Experience & Education Lists */
+.experienceList,
+.educationList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.experienceItem,
 .educationItem {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--gray-50);
-  margin-bottom: var(--space-3);
-  transition: transform 0.2s ease;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #0077b5;
 }
 
-.workItem:hover,
-.educationItem:hover {
-  transform: translateX(4px);
-  background: var(--secondary-blue);
+.experienceHeader,
+.educationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
-.workItem:last-child,
-.educationItem:last-child {
-  margin-bottom: 0;
+.experienceHeader h4,
+.educationHeader h4 {
+  margin: 0;
+  color: #2c3e50;
 }
 
-.workItem h3,
-.educationItem h3 {
-  font-weight: 600;
-  color: var(--gray-900);
-  margin-bottom: var(--space-1);
+.experienceYears,
+.educationYears {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .company,
-.school {
-  color: var(--primary-blue);
-  font-weight: 500;
-  margin-bottom: var(--space-1);
-}
-
-.years,
+.school,
 .field {
-  color: var(--gray-500);
-  font-size: var(--font-size-sm);
+  color: #555;
+  margin: 4px 0;
 }
 
+.experienceDescription,
+.educationDescription {
+  color: #666;
+  line-height: 1.5;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+/* No Data States */
 .noData {
-  color: var(--gray-500);
   text-align: center;
-  padding: var(--space-8);
-  font-style: italic;
+  padding: 40px 20px;
+  color: #666;
 }
 
+.noDataIcon {
+  font-size: 3rem !important;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.noData h4 {
+  margin-bottom: 8px;
+  color: #666;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0077b5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.errorIcon {
+  font-size: 3rem !important;
+  margin-bottom: 16px;
+  color: #dc3545;
+}
+
+.backButton {
+  background: #0077b5;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.backButton:hover {
+  background: #0056a4;
+}
+
+/* Add to your existing profile.module.css */
+
+.profileActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.connectButton, .downloadButton, .messageButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.connectButton {
+  background: #0073b1;
+  color: white;
+}
+
+.connectButton:hover:not(:disabled) {
+  background: #006097;
+  transform: translateY(-1px);
+}
+
+.connectButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.connectButton.connected {
+  background: #28a745;
+}
+
+.connectButton.requestSent {
+  background: #ffc107;
+  color: #333;
+}
+
+.downloadButton {
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.downloadButton:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.messageButton {
+  background: #28a745;
+  color: white;
+}
+
+.messageButton:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.messageButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.messageButton.disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.buttonIcon {
+  font-size: 16px;
+}
+
+/* Connection status styles */
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.statusDot {
+  font-size: 8px;
+}
+
+.statusDot.connected {
+  color: #28a745;
+}
+
+.statusDot.pending {
+  color: #ffc107;
+}
+
+.statusDot.notConnected {
+  color: #6c757d;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .profileContainer {
-    padding: var(--space-4);
+  .profileActions {
+    flex-direction: column;
   }
   
-  .profileInfo {
+  .connectButton, .downloadButton, .messageButton {
+    width: 100%;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: 16px;
+  }
+  
+  .profileMain {
     flex-direction: column;
-    align-items: center;
     text-align: center;
-    padding: 0 var(--space-4) var(--space-6);
-    margin-top: -80px;
+    gap: 16px;
   }
   
   .profileAvatar {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profileStats {
+    gap: 16px;
   }
   
   .profileActions {
+    justify-content: center;
+  }
+  
+  .experienceHeader,
+  .educationHeader {
     flex-direction: column;
-    width: 100%;
-  }
-  
-  .profileContent {
-    grid-template-columns: 1fr;
-  }
-  
-  .connectButton,
-  .downloadButton {
-    width: 100%;
+    align-items: flex-start;
+    gap: 4px;
   }
 }

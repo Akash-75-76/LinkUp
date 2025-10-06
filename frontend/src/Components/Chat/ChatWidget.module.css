@@ -1,0 +1,211 @@
+.chatWidget {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.chatToggle {
+  background: #0073b1;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 115, 177, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.chatToggle:hover {
+  transform: scale(1.1);
+  background: #006097;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.chatPanel {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 350px;
+  height: 500px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+}
+
+.chatHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.chatHeader h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.searchContainer {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 18px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 10px 10px 35px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  font-size: 14px;
+}
+
+.searchInput:focus {
+  border-color: #0073b1;
+}
+
+.chatContent {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chatList {
+  padding: 10px;
+}
+
+.chatItem {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 5px;
+}
+
+.chatItem:hover {
+  background-color: #f5f5f5;
+}
+
+.userAvatar {
+  position: relative;
+  margin-right: 12px;
+}
+
+.userAvatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.onlineIndicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 12px;
+}
+
+.onlineIndicator.online {
+  color: #4caf50;
+}
+
+.onlineIndicator.offline {
+  color: #ccc;
+}
+
+.chatInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.chatInfo h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.lastMessage {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.messageTime {
+  font-size: 11px;
+  color: #999;
+}
+
+.unreadBadge {
+  width: 8px;
+  height: 8px;
+  background: #0073b1;
+  border-radius: 50%;
+}
+
+.loading, .noChats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  text-align: center;
+  padding: 20px;
+}
+
+.noChatsIcon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.noChats p {
+  margin: 0 0 5px 0;
+  font-weight: 500;
+}
+
+.noChats span {
+  font-size: 12px;
+  color: #999;
+}

@@ -1,234 +1,384 @@
 .createPostPage {
   max-width: 600px;
   margin: 0 auto;
-  padding: 0;
-  background: var(--white);
-  min-height: 100vh;
+  background: #ffffff;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 20px 24px;
   position: sticky;
   top: 0;
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
-  padding: 20px;
-  z-index: 10;
+  z-index: 100;
+}
+
+.headerContent {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
 }
 
 .closeButton {
-  background: var(--gray-200);
+  background: none;
   border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  font-size: 2rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  transition: background 0.2s ease;
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .closeButton:hover {
-  background: var(--gray-300);
+  background: #f0f0f0;
+  color: #333;
 }
 
-.header h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--gray-900);
-  margin: 0;
+.closeIcon {
+  line-height: 1;
 }
 
-.header p {
-  color: var(--gray-600);
-  font-size: var(--font-size-sm);
+.headerText {
+  flex: 1;
+}
+
+.headerText h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.headerText p {
+  color: #666;
+  font-size: 0.95rem;
   margin: 0;
 }
 
 .postForm {
-  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.authorSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.authorAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f8f9fa;
+}
+
+.authorInfo h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 2px;
+}
+
+.authorInfo p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .textareaContainer {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .postTextarea {
   width: 100%;
-  padding: 16px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-lg);
-  resize: vertical;
+  padding: 20px;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  resize: none;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
   font-family: inherit;
-  font-size: var(--font-size-base);
-  transition: border-color 0.2s ease;
-  background: var(--gray-50);
-  min-height: 150px;
 }
 
 .postTextarea:focus {
-  border-color: var(--primary-blue);
-  background: var(--white);
-  box-shadow: 0 0 0 3px var(--secondary-blue);
+  border-color: #0077b5;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
 }
 
 .postTextarea::placeholder {
-  color: var(--gray-400);
+  color: #999;
 }
 
 .charCount {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  font-size: var(--font-size-sm);
-  color: var(--gray-500);
-  background: var(--white);
+  bottom: 12px;
+  right: 12px;
+  color: #666;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.9);
   padding: 2px 6px;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
 }
 
+/* Media Preview */
 .mediaPreview {
   margin-bottom: 20px;
-  text-align: center;
+}
+
+.previewContainer {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
 }
 
 .previewImage {
-  max-width: 100%;
-  max-height: 300px;
-  border-radius: var(--radius-lg);
-  margin-bottom: 10px;
-}
-
-.fileInfo {
-  background: var(--gray-100);
-  padding: 12px 16px;
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  background: #f8f9fa;
+  display: block;
 }
 
 .removeMediaButton {
-  background: var(--error);
-  color: var(--white);
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .removeMediaButton:hover {
-  background: #dc2626;
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateY(-1px);
 }
 
+/* File Info */
+.fileInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f9fa;
+  padding: 16px 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.fileDetails {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fileIcon {
+  font-size: 1.2rem;
+}
+
+.fileName {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Post Actions */
 .postActions {
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .mediaUpload {
-  flex: 1;
+  position: relative;
 }
 
 .uploadLabel {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  background: var(--gray-100);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
-  color: var(--gray-700);
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #666;
 }
 
 .uploadLabel:hover {
-  background: var(--gray-200);
-  border-color: var(--gray-400);
+  background: #e9ecef;
+  border-color: #ccc;
+  color: #333;
 }
 
 .uploadIcon {
-  font-size: 18px;
+  font-size: 1.2rem;
 }
 
 .uploadInput {
-  display: none;
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .actionButtons {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+}
+
+.cancelButton,
+.submitButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cancelButton {
-  padding: 10px 20px;
-  background: transparent;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-lg);
-  font-weight: 500;
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: #6c757d;
+  color: white;
 }
 
-.cancelButton:hover {
-  background: var(--gray-100);
-  border-color: var(--gray-400);
+.cancelButton:hover:not(:disabled) {
+  background: #545b62;
+  transform: translateY(-1px);
 }
 
 .submitButton {
-  padding: 10px 24px;
-  background: var(--primary-blue);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-lg);
-  font-weight: 600;
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 80px;
+  background: #0077b5;
+  color: white;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: #0056a4;
   transform: translateY(-1px);
 }
 
 .submitButton:disabled {
-  background: var(--gray-400);
+  background: #ccc;
   cursor: not-allowed;
   transform: none;
 }
 
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Icon styles for CreatePostPage */
+.closeIcon {
+  font-size: 1.5rem;
+}
+
+.uploadIcon {
+  font-size: 1.2rem;
+  margin-right: 8px;
+}
+
+.fileIcon {
+  font-size: 1.2rem;
+  margin-right: 8px;
+  color: #666;
+}
+
+.buttonIcon {
+  font-size: 1rem;
+  margin-right: 4px;
+}
+
+.spinner {
+  color: white;
+  margin-right: 8px;
+}
+
+/* Ensure proper alignment with icons */
+.uploadLabel {
+  display: flex;
+  align-items: center;
+}
+
+.fileDetails {
+  display: flex;
+  align-items: center;
+}
+
+.removeMediaButton {
+  display: flex;
+  align-items: center;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .createPostPage {
-    padding: 0;
+    max-width: 100%;
   }
   
   .header {
-    padding: 15px;
+    padding: 16px 20px;
   }
   
   .postForm {
-    padding: 15px;
+    padding: 20px;
   }
   
   .postActions {
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .mediaUpload {
+    width: 100%;
+  }
+  
+  .uploadLabel {
+    justify-content: center;
+    width: 100%;
   }
   
   .actionButtons {
@@ -239,5 +389,40 @@
   .cancelButton,
   .submitButton {
     flex: 1;
+    justify-content: center;
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 16px;
+  }
+  
+  .headerText h1 {
+    font-size: 1.3rem;
+  }
+  
+  .postForm {
+    padding: 16px;
+  }
+  
+  .authorSection {
+    gap: 12px;
+  }
+  
+  .authorAvatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .postTextarea {
+    padding: 16px;
+    font-size: 1rem;
+  }
+  
+  .fileInfo {
+    padding: 12px 16px;
   }
 }

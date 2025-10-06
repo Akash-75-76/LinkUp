@@ -15,7 +15,12 @@ import {
   acceptConnectionRequest,
   rejectConnectionRequest,
   removeConnection,
-  getUserProfileById  // Add this import
+  getUserProfileById,
+  followUser,
+  unfollowUser,
+  getFollowersCount,
+  getFollowingCount,
+  checkIfFollowing
 } from "../controllers/user.controller.js";
 import multer from "multer";
 
@@ -32,7 +37,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Profile picture upload route
+// ✅ TEMPORARY FIX: Remove multer from register route for now
+router.route("/register").post(register);
+
+// Profile picture upload route (this stays with multer)
 router.post(
   "/update_profile_pic",
   upload.single("profile_pic"),
@@ -40,7 +48,6 @@ router.post(
 );
 
 // Authentication routes
-router.route("/register").post(register);
 router.route("/login").post(login);
 
 // User profile routes
@@ -51,7 +58,7 @@ router.route("/update_profile_data").post(updateProfileData);
 // User data routes
 router.route("/all").get(getAllUsers);
 router.get('/download_profile', downloadProfile);
-router.get('/profile/:userId', getUserProfileById); // Use controller function
+router.get('/profile/:userId', getUserProfileById);
 
 // Connection routes
 router.post("/send_connection_request", sendConnectionRequest);
@@ -61,5 +68,10 @@ router.get("/sent_connection_requests", getSentConnectionRequests);
 router.post("/accept_connection", acceptConnectionRequest);
 router.post("/reject_connection", rejectConnectionRequest);
 router.post("/remove_connection", removeConnection);
-
+// Follow routes
+router.post('/follow', followUser);
+router.post('/unfollow', unfollowUser);
+router.get('/following_count', getFollowingCount);
+router.get('/followers_count', getFollowersCount);
+router.get('/check_following', checkIfFollowing);
 export default router;

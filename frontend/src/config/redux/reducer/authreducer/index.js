@@ -39,7 +39,7 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       localStorage.removeItem("token");
-      return initialState; // Complete reset on logout
+      return initialState;
     },
     setTokenIsThere: (state) => {
       state.isTokenThere = true;
@@ -51,11 +51,21 @@ const authSlice = createSlice({
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
+    },
+    // Add these new reducers for manual state updates
+    addConnectionRequest: (state, action) => {
+      state.connectionRequests.push(action.payload);
+    },
+    addSentConnectionRequest: (state, action) => {
+      state.sentConnectionRequests.push(action.payload);
+    },
+    addConnection: (state, action) => {
+      state.connections.push(action.payload);
     }
   },
   extraReducers: (builder) => {
     builder
-      // Login - FIXED: Properly handle user data
+      // Login
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.message = "Knocking the door...";
@@ -68,11 +78,12 @@ const authSlice = createSlice({
         state.isTokenThere = true;
         state.message = "Welcome back!";
         
-        // FIX: Properly merge user data with token
         state.user = {
           ...action.payload.user,
           token: action.payload.token
         };
+        
+        console.log('Login successful, user:', state.user);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -84,7 +95,7 @@ const authSlice = createSlice({
         state.message = action.payload?.message || "Something went wrong";
       })
 
-      // Register - FIXED: Handle user data properly
+      // Register
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
         state.message = "Creating your account...";
@@ -97,7 +108,6 @@ const authSlice = createSlice({
         state.isTokenThere = true;
         state.message = "Account created successfully!";
         
-        // FIX: Set user data after registration
         state.user = {
           ...action.payload.user,
           token: action.payload.token
@@ -113,7 +123,7 @@ const authSlice = createSlice({
         state.message = action.payload?.message || "Something went wrong";
       })
 
-      // Get User + Profile - FIXED: Handle user data properly
+      // Get User + Profile
       .addCase(getUserAndProfile.pending, (state) => {
         state.isLoading = true;
       })
@@ -124,7 +134,6 @@ const authSlice = createSlice({
         state.loggedIn = true;
         state.isTokenThere = true;
         
-        // FIX: Merge user data properly
         if (action.payload.user) {
           state.user = {
             ...state.user,
@@ -148,8 +157,9 @@ const authSlice = createSlice({
       })
       .addCase(getAllUsers.fulfilled, (state, action) => {
         state.all_profiles_fetching = false;
-        state.all_users = action.payload;
+        state.all_users = action.payload || [];
         state.isError = false;
+        console.log('All users loaded:', state.all_users.length);
       })
       .addCase(getAllUsers.rejected, (state, action) => {
         state.all_profiles_fetching = false;
@@ -157,57 +167,77 @@ const authSlice = createSlice({
         state.message = action.payload?.message || "Failed to fetch users";
       })
 
-      // Get My Connection Requests
+      // Get My Connection Requests - FIXED: Add proper state handling
       .addCase(getMyConnectionRequests.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(getMyConnectionRequests.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.connectionRequests = action.payload;
+        state.connectionRequests = action.payload || [];
         state.isError = false;
+        console.log('Connection requests loaded:', state.connectionRequests.length);
+        console.log('Connection requests data:', state.connectionRequests);
       })
       .addCase(getMyConnectionRequests.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
+        state.connectionRequests = [];
         state.message = action.payload?.message || "Failed to fetch connection requests";
+        console.error('Failed to fetch connection requests:', action.payload);
       })
 
-      // Get My Connections
+      // Get My Connections - FIXED: Add proper state handling
       .addCase(whatAreMyConnections.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(whatAreMyConnections.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.connections = action.payload;
+        state.connections = action.payload || [];
         state.isError = false;
+        console.log('Connections loaded:', state.connections.length);
+        console.log('Connections data:', state.connections);
       })
       .addCase(whatAreMyConnections.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
+        state.connections = [];
         state.message = action.payload?.message || "Failed to fetch connections";
+        console.error('Failed to fetch connections:', action.payload);
       })
 
-      // Get Sent Connection Requests
+      // Get Sent Connection Requests - FIXED: Add proper state handling
       .addCase(getSentConnectionRequests.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(getSentConnectionRequests.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.sentConnectionRequests = action.payload;
+        state.sentConnectionRequests = action.payload || [];
         state.isError = false;
+        console.log('Sent connection requests loaded:', state.sentConnectionRequests.length);
+        console.log('Sent connection requests data:', state.sentConnectionRequests);
       })
       .addCase(getSentConnectionRequests.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
+        state.sentConnectionRequests = [];
         state.message = action.payload?.message || "Failed to fetch sent requests";
+        console.error('Failed to fetch sent requests:', action.payload);
       })
 
-      // Accept Connection Request
+      // Accept Connection Request - FIXED: Add the new connection to connections array
       .addCase(acceptConnectionRequest.fulfilled, (state, action) => {
+        // Remove from connection requests
         state.connectionRequests = state.connectionRequests.filter(
           request => request._id !== action.payload.requestId
         );
+        
+        // Add to connections if the backend returns the connection data
+        if (action.payload.connection) {
+          state.connections.push(action.payload.connection);
+        }
+        
         state.message = action.payload.message;
+        console.log('Connection request accepted, removed from requests');
       })
       .addCase(acceptConnectionRequest.rejected, (state, action) => {
         state.isError = true;
@@ -220,32 +250,44 @@ const authSlice = createSlice({
           request => request._id !== action.payload.requestId
         );
         state.message = action.payload.message;
+        console.log('Connection request rejected, removed from requests');
       })
       .addCase(rejectConnectionRequest.rejected, (state, action) => {
         state.isError = true;
         state.message = action.payload?.message || "Failed to reject connection";
       })
 
-      // Remove Connection
+      // Remove Connection - FIXED: Better filtering logic
       .addCase(removeConnection.fulfilled, (state, action) => {
-        state.connections = state.connections.filter(
-          conn => conn.userId._id !== action.payload.connectionId && 
-                  conn.connectionId._id !== action.payload.connectionId
-        );
+        state.connections = state.connections.filter(conn => {
+          // Check both userId and connectionId with safe access
+          const userId = conn.userId?._id || conn.userId;
+          const connectionId = conn.connectionId?._id || conn.connectionId;
+          return userId !== action.payload.connectionId && connectionId !== action.payload.connectionId;
+        });
         state.message = action.payload.message;
+        console.log('Connection removed, remaining:', state.connections.length);
       })
       .addCase(removeConnection.rejected, (state, action) => {
         state.isError = true;
         state.message = action.payload?.message || "Failed to remove connection";
       })
 
-      // Send Connection Request
+      // Send Connection Request - FIXED: Add to sentConnectionRequests
       .addCase(sendConnectionRequest.fulfilled, (state, action) => {
         state.message = action.payload.message;
+        
+        // If we have the request data, add it to sent requests
+        if (action.payload.request) {
+          state.sentConnectionRequests.push(action.payload.request);
+        }
+        
+        console.log('Connection request sent successfully');
       })
       .addCase(sendConnectionRequest.rejected, (state, action) => {
         state.isError = true;
         state.message = action.payload?.message || "Failed to send connection request";
+        console.error('Send connection request failed:', action.payload);
       });
   },
 });
@@ -256,6 +298,9 @@ export const {
   logout, 
   setTokenIsNotThere, 
   setTokenIsThere,
-  updateUserData 
+  updateUserData,
+  addConnectionRequest,
+  addSentConnectionRequest,
+  addConnection
 } = authSlice.actions;
 export default authSlice.reducer;

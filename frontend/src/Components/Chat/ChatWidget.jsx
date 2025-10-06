@@ -92,7 +92,7 @@ const ChatWidget = () => {
                       <div className={styles.userAvatar}>
                         <img 
                           src={otherUser?.profilePicture && otherUser.profilePicture !== 'default.jpg' 
-                            ? `http://localhost:5000/uploads/${otherUser.profilePicture}`
+                            ? `https://linkup-o722.onrender.com/uploads/${otherUser.profilePicture}`
                             : DEFAULT_AVATAR
                           }
                           alt={otherUser?.name}

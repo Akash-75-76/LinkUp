@@ -124,7 +124,7 @@ function MyConnectionsPage() {
 
   const getProfileImageUrl = (profilePicture) => {
     if (profilePicture && profilePicture !== 'default.jpg') {
-      return `http://localhost:5000/uploads/${profilePicture}`;
+      return `https://linkup-o722.onrender.com/uploads/${profilePicture}`;
     }
     return DEFAULT_AVATAR;
   }

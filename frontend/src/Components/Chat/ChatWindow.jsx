@@ -129,7 +129,7 @@ const ChatWindow = () => {
             src={
               currentChat.userInfo?.profilePicture &&
               currentChat.userInfo.profilePicture !== "default.jpg"
-                ? `http://localhost:5000/uploads/${currentChat.userInfo.profilePicture}`
+                ? `https://linkup-o722.onrender.com/uploads/${currentChat.userInfo.profilePicture}`
                 : DEFAULT_AVATAR
             }
             alt={currentChat.userInfo?.name}
@@ -167,7 +167,7 @@ const ChatWindow = () => {
             >
               {msg.messageType === "image" ? (
                 <img
-                  src={`http://localhost:5000/uploads/${msg.mediaUrl}`}
+                  src={`https://linkup-o722.onrender.com/uploads/${msg.mediaUrl}`}
                   alt="Shared content"
                   className={styles.chatImage}
                 />

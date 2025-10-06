@@ -48,7 +48,7 @@ function UserProfile() {
   const fetchUserProfile = async (userId) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`http://localhost:5000/api/users/profile/${userId}`)
+      const response = await fetch(`https://linkup-o722.onrender.com/api/users/profile/${userId}`)
       if (!response.ok) {
         throw new Error('Profile not found')
       }
@@ -94,7 +94,7 @@ function UserProfile() {
 
    const fetchFollowingCount = async (userId) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/users/following_count?userId=${userId}`)
+    const response = await fetch(`https://linkup-o722.onrender.com/api/users/following_count?userId=${userId}`)
     if (response.ok) {
       const data = await response.json()
       setFollowingCount(data.count || 0)
@@ -143,7 +143,7 @@ function UserProfile() {
     if (!userProfile) return
     
     try {
-      const response = await fetch(`http://localhost:5000/api/users/download_profile?user_id=${userProfile.userId?._id || userProfile._id}`)
+      const response = await fetch(`https://linkup-o722.onrender.com/api/users/download_profile?user_id=${userProfile.userId?._id || userProfile._id}`)
       if (!response.ok) {
         throw new Error('Failed to download resume')
       }
@@ -222,7 +222,7 @@ function UserProfile() {
             <div className={styles.avatarSection}>
               <img 
                 src={userData.profilePicture && userData.profilePicture !== 'default.jpg' ? 
-                  `http://localhost:5000/uploads/${userData.profilePicture}` : 
+                  `https://linkup-o722.onrender.com/uploads/${userData.profilePicture}` : 
                   DEFAULT_AVATAR
                 } 
                 alt={userData.name}

@@ -113,7 +113,7 @@ function CreatePostPage() {
             <img 
               src={
                 user?.profilePicture && user.profilePicture !== "default.jpg"
-                  ? `http://localhost:5000/uploads/${user.profilePicture}`
+                  ? `https://linkup-o722.onrender.com/uploads/${user.profilePicture}`
                   : "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTYiIHI9IjgiIGZpbGw9IiM5QjlCOUIiLz4KPHBhdGggZD0iTTAgMzRDMCAyOC4yNTYgNC4yNTYgMjQgMTAgMjRIMzBDMzUuNzQ0IDI0IDQwIDI4LjI1NiA0MCAzNFY0MEgwVjM0WiIgZmlsbD0iIzlCOUI5QiIvPgo8L3N2Zz4="
               }
               alt="Your profile"

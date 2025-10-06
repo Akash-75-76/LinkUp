@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import styles from "./register.module.css";
-import { registerUser } from "@/config/redux/action/authAction";
+import { registerUser } from "../../config/redux/action/authAction/index.js";
 
 // Material-UI Icons
 import PersonIcon from "@mui/icons-material/Person";

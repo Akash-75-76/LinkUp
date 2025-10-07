@@ -47,6 +47,8 @@ router.post(
   uploadProfilePic
 );
 
+
+
 // Authentication routes
 router.route("/login").post(login);
 

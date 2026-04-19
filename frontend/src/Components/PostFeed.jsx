@@ -6,6 +6,7 @@ import {
   addComment,
   deleteComment,
 } from "@/config/redux/action/postAction";
+import { API_BASE_URL, UPLOADS_BASE_URL } from "@/config";
 import ThumbUp from '@mui/icons-material/ThumbUp';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ChatBubble from '@mui/icons-material/ChatBubble';
@@ -15,7 +16,6 @@ import Send from '@mui/icons-material/Send';
 import Description from '@mui/icons-material/Description';
 import styles from "./PostFeed.module.css";
 
-const API_BASE_URL = "https://linkup-o722.onrender.com";
 const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjIwIiBmaWxsPSIjOUI5QjlCIi8+CjxwYXRoIGQ9Ik0wIDg1QzAgNzAuNjQgMTEuNjQgNTkgMjYgNTlINzRDODguMzYgNTkgMTAwIDcwLjY0IDEwMCA4NVYxMDBIMFY4NVoiIGZpbGw9IiM5QjlCOUIiLz4KPC9zdmc+";
 
 const PostFeed = () => {
@@ -83,7 +83,9 @@ const PostFeed = () => {
                     src={
                       post.userId?.profilePicture &&
                       post.userId.profilePicture !== "default.jpg"
-                        ? `${API_BASE_URL}/uploads/${post.userId.profilePicture}`
+                        ? (post.userId.profilePicture.startsWith('http://') || post.userId.profilePicture.startsWith('https://') ?
+                            post.userId.profilePicture :
+                            `${UPLOADS_BASE_URL}/uploads/${post.userId.profilePicture}`)
                         : DEFAULT_AVATAR
                     }
                     alt={post.userId?.name}
@@ -196,7 +198,9 @@ const PostFeed = () => {
                   <img
                     src={
                       user?.profilePicture && user.profilePicture !== "default.jpg"
-                        ? `${API_BASE_URL}/uploads/${user.profilePicture}`
+                        ? (user.profilePicture.startsWith('http://') || user.profilePicture.startsWith('https://') ?
+                            user.profilePicture :
+                            `${UPLOADS_BASE_URL}/uploads/${user.profilePicture}`)
                         : DEFAULT_AVATAR
                     }
                     alt="Your avatar"
@@ -237,7 +241,9 @@ const PostFeed = () => {
                         src={
                           comment.userId?.profilePicture &&
                           comment.userId.profilePicture !== "default.jpg"
-                            ? `${API_BASE_URL}/uploads/${comment.userId.profilePicture}`
+                            ? (comment.userId.profilePicture.startsWith('http://') || comment.userId.profilePicture.startsWith('https://') ?
+                                comment.userId.profilePicture :
+                                `${UPLOADS_BASE_URL}/uploads/${comment.userId.profilePicture}`)
                             : DEFAULT_AVATAR
                         }
                         alt={comment.userId?.name}

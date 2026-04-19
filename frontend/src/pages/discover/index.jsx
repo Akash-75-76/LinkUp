@@ -3,6 +3,7 @@ import UserLayout from "@/layout/userLayout";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllUsers, sendConnectionRequest, getSentConnectionRequests, whatAreMyConnections, getMyConnectionRequests } from "@/config/redux/action/authAction";
+import { UPLOADS_BASE_URL } from "@/config";
 import { useRouter } from "next/router";
 import { idEq } from "@/utils/id";
 import styles from "./discover.module.css";
@@ -135,7 +136,9 @@ function DiscoverPage() {
 
   const getProfileImageUrl = (profilePicture) => {
     if (profilePicture && profilePicture !== 'default.jpg') {
-      return `https://linkup-o722.onrender.com/uploads/${profilePicture}`;
+      return (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) ?
+        profilePicture :
+        `${UPLOADS_BASE_URL}/uploads/${profilePicture}`;
     }
     return DEFAULT_AVATAR;
   };

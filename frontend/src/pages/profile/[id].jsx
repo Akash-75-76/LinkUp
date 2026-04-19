@@ -277,7 +277,9 @@ function UserProfile() {
             <div className={styles.avatarSection}>
               <img 
                 src={userData.profilePicture && userData.profilePicture !== 'default.jpg' ? 
-                  `${UPLOADS_BASE_URL}/uploads/${userData.profilePicture}` : 
+                  (userData.profilePicture.startsWith('http://') || userData.profilePicture.startsWith('https://') ? 
+                    userData.profilePicture : 
+                    `${UPLOADS_BASE_URL}/uploads/${userData.profilePicture}`) : 
                   DEFAULT_AVATAR
                 } 
                 alt={userData.name}

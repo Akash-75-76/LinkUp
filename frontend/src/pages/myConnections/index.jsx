@@ -10,6 +10,7 @@ import {
   removeConnection,
   getSentConnectionRequests
 } from '@/config/redux/action/authAction'
+import { UPLOADS_BASE_URL } from '@/config'
 import { openChatWithUser } from '@/config/redux/reducer/chatReducer'
 import styles from "./myConnections.module.css"
 import { useRouter } from 'next/router'
@@ -125,7 +126,9 @@ function MyConnectionsPage() {
 
   const getProfileImageUrl = (profilePicture) => {
     if (profilePicture && profilePicture !== 'default.jpg') {
-      return `https://linkup-o722.onrender.com/uploads/${profilePicture}`;
+      return (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) ?
+        profilePicture :
+        `${UPLOADS_BASE_URL}/uploads/${profilePicture}`;
     }
     return DEFAULT_AVATAR;
   }

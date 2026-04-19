@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '@/config/redux/reducer/authreducer';
 import { markNotificationRead, clearAllNotifications } from '@/config/redux/reducer/chatReducer';
-import { clientServer } from '@/config';
+import { clientServer, API_BASE_URL, UPLOADS_BASE_URL } from '@/config';
 import { getSocket } from '@/config/socket';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Dashboard from '@mui/icons-material/Dashboard';
@@ -158,7 +158,9 @@ const Navbar = () => {
                                   src={
                                     notif.from?.profilePicture &&
                                     notif.from.profilePicture !== 'default.jpg'
-                                      ? `https://linkup-o722.onrender.com/uploads/${notif.from.profilePicture}`
+                                      ? (notif.from.profilePicture.startsWith('http://') || notif.from.profilePicture.startsWith('https://') ?
+                                          notif.from.profilePicture :
+                                          `${UPLOADS_BASE_URL}/uploads/${notif.from.profilePicture}`)
                                       : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTYiIHI9IjgiIGZpbGw9IiM5QjlCOUIiLz4KPHBhdGggZD0iTTAgMzRDMCAyOC4yNTYgNC4yNTYgMjQgMTAgMjRIMzBDMzUuNzQ0IDI0IDQwIDI4LjI1NiA0MCAzNFY0MEgwVjM0WiIgZmlsbD0iIzlCOUI5QiIvPgo8L3N2Zz4='
                                   }
                                   alt=""

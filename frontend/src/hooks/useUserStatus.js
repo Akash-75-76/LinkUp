@@ -24,20 +24,17 @@ export const useUserStatus = () => {
     setOnline();
 
     // Set user as offline when page unloads
-    const handleBeforeUnload = async () => {
+    const handleBeforeUnload = () => {
       try {
-        // Use fetch with keepalive for reliable offline status update
-        await fetch('http://localhost:5000/api/user-status/update_status', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: user.token,
-            isOnline: false
-          }),
-          keepalive: true // This ensures the request completes even if page is unloading
-        });
+        // Use sendBeacon with Blob for reliable offline status update during unload
+        const blob = new Blob([JSON.stringify({
+          token: user.token,
+          isOnline: false
+        })], { type: 'application/json' });
+        navigator.sendBeacon(
+          'https://linkup-o722.onrender.com/api/user-status/update_status',
+          blob
+        );
       } catch (error) {
         console.error('Failed to set offline status:', error);
       }

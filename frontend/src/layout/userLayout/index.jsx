@@ -6,12 +6,14 @@ import CircularProgress from '@mui/material/CircularProgress'
 import ChatWidget from '@/Components/Chat/ChatWidget'
 import ChatWindow from '@/Components/Chat/ChatWindow'
 import { useUserStatus } from '@/hooks/useUserStatus'
+import { useSocket } from '@/hooks/useSocket'
 const UserLayout = ({children}) => {
   const dispatch = useDispatch()
   const authState = useSelector((state) => state.auth)
   const [hasFetched, setHasFetched] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   useUserStatus();
+  useSocket();
   useEffect(() => {
     const token = localStorage.getItem('token')
     

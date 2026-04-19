@@ -2,17 +2,29 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import { createServer } from 'http';
+import { initSocket } from './socket.js';
 import postRoutes from './routes/post.routes.js';
 import userRoutes from './routes/user.routes.js';
-import chatRoutes from './routes/chat.routes.js'; // Add this line
-import userStatusRoutes from './routes/userStatus.routes.js'; // Add this line
+import chatRoutes from './routes/chat.routes.js';
+import userStatusRoutes from './routes/userStatus.routes.js';
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
+
+// Initialize Socket.IO
+const io = initSocket(httpServer);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Attach io to req for use in controllers
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -34,7 +46,7 @@ app.get('/', (req, res) => {
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/user-status', userStatusRoutes); // Add this
+app.use('/api/user-status', userStatusRoutes);
 app.use('/uploads', express.static('uploads'));
 
 // 404 Handler
@@ -54,6 +66,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+// Use httpServer instead of app.listen so Socket.IO shares the port
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`⚡ Socket.IO is ready for connections`);
 });

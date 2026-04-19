@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import Profile from "../models/profile.model.js";
 import crypto from "crypto";
 import PDFDocument from "pdfkit";
@@ -7,6 +8,9 @@ import fs from "fs";
 import path from "path";
 import ConnectionRequest from "../models/connections.model.js";
 import Follow from "../models/follow.model.js";
+import Post from "../models/posts.model.js";
+import { Notification } from "../models/chat.model.js";
+import { emitToUser, emitRelationshipUpdate } from "../socket.js";
 const convertUserDataTOPDF = async (userProfile) => {
   const doc = new PDFDocument();
   const outputPath = crypto.randomBytes(32).toString("hex") + ".pdf";
@@ -16,7 +20,7 @@ const convertUserDataTOPDF = async (userProfile) => {
   doc.pipe(stream);
 
   // Add profile picture with error handling
-  if (userProfile.userId.profilePicture && userProfile.userId.profilePicture !== "default.png") {
+  if (userProfile.userId.profilePicture && userProfile.userId.profilePicture !== "default.jpg") {
     try {
       const imagePath = path.join("uploads", userProfile.userId.profilePicture);
       if (fs.existsSync(imagePath)) {
@@ -268,13 +272,40 @@ export const updateProfileData = async (req, res) => {
     return res
       .status(200)
       .json({ message: "Profile data updated successfully" });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Update profile data error:", error);
+    return res.status(500).json({ message: error.message || "Failed to update profile data" });
+  }
 };
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}, "-password -token");
-    return res.status(200).json(users);
+    const users = await User.find({}, "-password -token").lean();
+    
+    // Get counts for each user
+    const usersWithCounts = await Promise.all(users.map(async (user) => {
+      const userIdObj = new mongoose.Types.ObjectId(user._id);
+      
+      const postsCount = await Post.countDocuments({ userId: userIdObj });
+      const followersCount = await Follow.countDocuments({ followingId: userIdObj });
+      const connectionsCount = await ConnectionRequest.countDocuments({
+        $or: [
+          { userId: userIdObj, status: 'accepted' },
+          { connectionId: userIdObj, status: 'accepted' }
+        ]
+      });
+
+      console.log(`User: ${user.username}, Posts: ${postsCount}, Followers: ${followersCount}, Conns: ${connectionsCount}`);
+      
+      return {
+        ...user,
+        postsCount,
+        followersCount,
+        connectionsCount
+      };
+    }));
+
+    return res.status(200).json(usersWithCounts);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -299,59 +330,285 @@ export const downloadProfile = async (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
     res.setHeader("Content-Type", "application/pdf");
 
-    const doc = new PDFDocument();
-    
-    // ✅ Create a dual stream: save to file AND send to response
-    const fileStream = fs.createWriteStream(filePath);
-    doc.pipe(fileStream); // Save to uploads folder
-    doc.pipe(res); // Stream to response
+    const doc = new PDFDocument({
+      bufferPages: true,
+      size: "A4",
+      margin: 0,
+    });
 
-    // Add profile picture if it exists
-    if (userProfile.userId.profilePicture && userProfile.userId.profilePicture !== "default.png") {
+    const fileStream = fs.createWriteStream(filePath);
+    doc.pipe(fileStream);
+    doc.pipe(res);
+
+    const theme = {
+      headerBg: "#0f172a",
+      headerAccent: "#312e81",
+      accent: "#6366f1",
+      accentSoft: "#eef2ff",
+      text: "#1e293b",
+      textMuted: "#64748b",
+      border: "#e2e8f0",
+      card: "#f8fafc",
+      white: "#ffffff",
+    };
+
+    const pageW = doc.page.width;
+    const pageH = doc.page.height;
+    const padX = 48;
+    const contentW = pageW - padX * 2;
+    const headerH = 148;
+    const avatarSize = 96;
+    const avatarR = 14;
+
+    const ensureSpace = (needed = 72) => {
+      if (doc.y + needed > pageH - 56) {
+        doc.addPage();
+        doc.fillColor(theme.white).rect(0, 0, pageW, pageH).fill();
+        doc.y = 48;
+      }
+    };
+
+    const drawSectionLabel = (label) => {
+      ensureSpace(48);
+      const y0 = doc.y;
+      doc.rect(padX, y0 + 2, 3, 13).fill(theme.accent);
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(10)
+        .fillColor(theme.textMuted)
+        .text(label.toUpperCase(), padX + 10, y0, { width: contentW - 14 });
+      doc.moveDown(0.85);
+    };
+
+    // ── Header (dark band + optional rounded photo) ──
+    doc.rect(0, 0, pageW, headerH).fill(theme.headerBg);
+    doc.rect(0, headerH - 36, pageW, 36).fill(theme.headerAccent);
+
+    const pic = userProfile.userId.profilePicture;
+    const wantsPhoto =
+      pic &&
+      pic !== "default.jpg" &&
+      pic !== "default.png";
+
+    let photoRendered = false;
+    if (wantsPhoto) {
       try {
         const imagePath = path.join("uploads", userProfile.userId.profilePicture);
-        
         if (fs.existsSync(imagePath)) {
-          doc.image(imagePath, {
-            fit: [100, 100],
-            align: "center"
+          const ax = padX;
+          const ay = 32;
+          doc.save();
+          doc.roundedRect(ax, ay, avatarSize, avatarSize, avatarR).clip();
+          doc.image(imagePath, ax, ay, {
+            width: avatarSize,
+            height: avatarSize,
+            align: "center",
+            valign: "center",
           });
-          doc.moveDown();
-        } else {
-          console.log(`Profile picture not found: ${imagePath}`);
-          doc.text("Profile Picture: Not available", { align: "center" });
+          doc.restore();
+          doc
+            .lineWidth(2.5)
+            .strokeColor("#ffffff")
+            .roundedRect(ax, ay, avatarSize, avatarSize, avatarR)
+            .stroke();
+          photoRendered = true;
         }
       } catch (imageError) {
         console.error("Error adding profile picture:", imageError);
-        doc.text("Profile Picture: Error loading", { align: "center" });
       }
-    } else {
-      doc.text("Profile Picture: Not set", { align: "center" });
     }
 
-    // Add user information
-    doc.fontSize(16).text("Profile Information", { align: "center", underline: true });
-    doc.moveDown();
-    
-    doc.fontSize(12).text(`Name: ${userProfile.userId.name}`);
-    doc.text(`Username: ${userProfile.userId.username}`);
-    doc.text(`Email: ${userProfile.userId.email}`);
-    doc.text(`Bio: ${userProfile.bio || "Not provided"}`);
-    doc.text(`Current Position: ${userProfile.currentPost || "Not provided"}`);
-    doc.moveDown();
+    if (!photoRendered) {
+      const initials = (userProfile.userId.name || "?")
+        .split(/\s+/)
+        .map((s) => s[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+      doc.roundedRect(padX, 32, avatarSize, avatarSize, avatarR).fill("#475569");
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(28)
+        .fillColor("#e2e8f0")
+        .text(initials, padX, 32 + avatarSize / 2 - 12, {
+          width: avatarSize,
+          align: "center",
+        });
+    }
 
-    // Add past work experience
-    doc.fontSize(14).text("Work Experience:", { underline: true });
+    const textLeft = padX + avatarSize + 22;
+    const nameY = 38;
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(26)
+      .fillColor(theme.white)
+      .text(userProfile.userId.name, textLeft, nameY, { width: pageW - textLeft - padX });
+    doc
+      .font("Helvetica")
+      .fontSize(11)
+      .fillColor("#94a3b8")
+      .text(`@${userProfile.userId.username}`, textLeft, nameY + 32, { width: pageW - textLeft - padX });
+    doc
+      .font("Helvetica")
+      .fontSize(10)
+      .fillColor("#cbd5e1")
+      .text(userProfile.userId.email, textLeft, nameY + 50, { width: pageW - textLeft - padX });
+
+    if (userProfile.currentPost) {
+      doc
+        .font("Helvetica-Oblique")
+        .fontSize(10.5)
+        .fillColor("#a5b4fc")
+        .text(userProfile.currentPost, textLeft, nameY + 72, {
+          width: pageW - textLeft - padX,
+          lineGap: 2,
+        });
+    }
+
+    doc.x = padX;
+    doc.y = headerH + 28;
+
+    // ── Summary / About ──
+    if (userProfile.bio) {
+      drawSectionLabel("Profile");
+      doc
+        .font("Helvetica")
+        .fontSize(10.5)
+        .fillColor(theme.text)
+        .text(userProfile.bio, {
+          width: contentW,
+          lineGap: 4,
+          align: "left",
+        });
+      doc.moveDown(1.1);
+    }
+
+    // ── Work experience ──
+    drawSectionLabel("Experience");
     if (userProfile.pastWork && userProfile.pastWork.length > 0) {
       userProfile.pastWork.forEach((work, index) => {
-        doc.fontSize(12).text(`${index + 1}. Company: ${work.company || "N/A"}`);
-        doc.text(`   Position: ${work.position || "N/A"}`);
-        doc.text(`   Years: ${work.years || "N/A"}`);
-        doc.moveDown(0.5);
+        const company = work.company || "Company";
+        const role = work.position || "Role";
+        const years = work.years || "";
+        const meta = [role, years].filter(Boolean).join(" · ");
+        const desc = work.description ? String(work.description) : "";
+
+        doc.font("Helvetica").fontSize(9.5);
+        const descH = desc
+          ? doc.heightOfString(desc, {
+              width: contentW - 28,
+              lineGap: 2,
+            })
+          : 0;
+        const blockH = Math.max(58, 44 + (desc ? 8 + descH : 0));
+
+        ensureSpace(blockH + 14);
+        const blockTop = doc.y;
+
+        doc.fillColor(theme.accentSoft).roundedRect(padX, blockTop, contentW, blockH, 6).fill();
+        doc.strokeColor(theme.border).lineWidth(0.4).roundedRect(padX, blockTop, contentW, blockH, 6).stroke();
+
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(12)
+          .fillColor(theme.text)
+          .text(company, padX + 14, blockTop + 12, { width: contentW - 28 });
+        doc
+          .font("Helvetica")
+          .fontSize(10)
+          .fillColor(theme.accent)
+          .text(meta, padX + 14, blockTop + 30, { width: contentW - 28 });
+        if (desc) {
+          doc
+            .font("Helvetica")
+            .fontSize(9.5)
+            .fillColor(theme.textMuted)
+            .text(desc, padX + 14, blockTop + 46, {
+              width: contentW - 28,
+              lineGap: 2,
+            });
+        }
+
+        doc.y = blockTop + blockH + (index < userProfile.pastWork.length - 1 ? 10 : 6);
       });
     } else {
-      doc.fontSize(12).text("No work experience listed");
+      doc
+        .font("Helvetica-Oblique")
+        .fontSize(10)
+        .fillColor(theme.textMuted)
+        .text("No work experience listed yet.", { width: contentW });
+      doc.moveDown(0.6);
     }
+
+    doc.moveDown(0.9);
+
+    // ── Education ──
+    drawSectionLabel("Education");
+    if (userProfile.education && userProfile.education.length > 0) {
+      userProfile.education.forEach((edu, index) => {
+        const school = edu.school || "School";
+        const degreeParts = [edu.degree, edu.fieldOfStudy, edu.years].filter(Boolean);
+        const degreeLine =
+          degreeParts.length > 0
+            ? degreeParts.join(" · ")
+            : "Program";
+
+        doc.font("Helvetica").fontSize(10);
+        const lineH = doc.heightOfString(degreeLine, { width: contentW - 28 });
+        const eduBlockH = Math.max(58, 42 + Math.min(lineH, 48));
+
+        ensureSpace(eduBlockH + 18);
+        const blockTop = doc.y;
+
+        doc.fillColor("#f0fdf4").roundedRect(padX, blockTop, contentW, eduBlockH, 6).fill();
+        doc.strokeColor("#bbf7d0").lineWidth(0.35).roundedRect(padX, blockTop, contentW, eduBlockH, 6).stroke();
+
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(11.5)
+          .fillColor(theme.text)
+          .text(school, padX + 14, blockTop + 12, { width: contentW - 28 });
+        doc
+          .font("Helvetica")
+          .fontSize(10)
+          .fillColor("#15803d")
+          .text(degreeLine, padX + 14, blockTop + 30, { width: contentW - 28 });
+
+        doc.y = blockTop + eduBlockH + (index < userProfile.education.length - 1 ? 10 : 6);
+      });
+    } else {
+      doc
+        .font("Helvetica-Oblique")
+        .fontSize(10)
+        .fillColor(theme.textMuted)
+        .text("No education entries yet.", { width: contentW });
+    }
+
+    doc.moveDown(1);
+
+    // ── Footer (follows content; avoids overlap) ──
+    ensureSpace(40);
+    const footerLineY = doc.y + 4;
+    doc
+      .moveTo(padX, footerLineY)
+      .lineTo(pageW - padX, footerLineY)
+      .strokeColor(theme.border)
+      .lineWidth(0.75)
+      .stroke();
+    doc
+      .font("Helvetica")
+      .fontSize(8.5)
+      .fillColor("#94a3b8")
+      .text(
+        `LinkUp · Resume export · ${new Date().toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })}`,
+        padX,
+        footerLineY + 10,
+        { width: contentW, align: "center" }
+      );
 
     doc.end();
 
@@ -410,16 +667,37 @@ export const sendConnectionRequest = async (req, res) => {
     
     await request.save();
 
-    return res.status(200).json({ 
+    try {
+      const connNotif = new Notification({
+        type: "connection_request",
+        from: user._id,
+        to: connectionUser._id,
+        message: `${user.name} sent you a connection request`,
+        metadata: { requestId: request._id.toString() },
+      });
+      await connNotif.save();
+      await connNotif.populate("from", "name username profilePicture");
+      if (req.io) {
+        emitToUser(
+          req.io,
+          connectionUser._id,
+          "notification",
+          connNotif.toObject()
+        );
+      }
+    } catch (notifErr) {
+      console.error("Connection request notification error:", notifErr);
+    }
+
+    return res.status(200).json({
       message: "Connection request sent successfully",
-      requestId: request._id 
+      requestId: request._id,
     });
-    
   } catch (error) {
     console.error("Error sending connection request:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 export const getMyConnectionRequests = async (req, res) => {
   const { token } = req.query;
   try {
@@ -476,7 +754,8 @@ export const getSentConnectionRequests = async (req, res) => {
     
     // Get requests sent BY the current user
     const sentRequests = await ConnectionRequest.find({ 
-      userId: user._id 
+      userId: user._id,
+      status: 'pending'
     })
     .populate('connectionId', 'name username email profilePicture')
     .sort({ createdAt: -1 });
@@ -508,7 +787,43 @@ export const acceptConnectionRequest = async (req, res) => {
     connectionRequest.status = 'accepted';
     await connectionRequest.save();
 
-    return res.status(200).json({ message: "Connection request accepted" });
+    // Populate the fields so the frontend can add it to connections immediately
+    await connectionRequest.populate('userId', 'name username email profilePicture');
+    await connectionRequest.populate('connectionId', 'name username email profilePicture');
+
+    const senderId = connectionRequest.userId._id || connectionRequest.userId;
+
+    try {
+      const acceptedNotif = new Notification({
+        type: "connection_accepted",
+        from: user._id,
+        to: senderId,
+        message: `${user.name} accepted your connection request`,
+        metadata: { requestId: connectionRequest._id.toString() },
+      });
+      await acceptedNotif.save();
+      await acceptedNotif.populate("from", "name username profilePicture");
+      if (req.io) {
+        emitToUser(req.io, senderId, "notification", acceptedNotif.toObject());
+      }
+    } catch (notifErr) {
+      console.error("Accept notification error:", notifErr);
+    }
+
+    const relPayload = {
+      type: "connection_accepted",
+      userId: String(senderId),
+      connectionId: String(user._id),
+      connection: connectionRequest.toObject({ virtuals: true }),
+    };
+    if (req.io) {
+      emitRelationshipUpdate(req.io, relPayload);
+    }
+
+    return res.status(200).json({
+      message: "Connection request accepted",
+      connection: connectionRequest,
+    });
   } catch (error) {
     console.error("Error accepting connection:", error);
     return res.status(500).json({ message: "Internal server error" });

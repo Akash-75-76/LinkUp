@@ -13,6 +13,10 @@ const EducationSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    years: {
+        type: String,
+        default: null
+    },
 });
 
 const WorkSchema = new mongoose.Schema({
@@ -27,6 +31,10 @@ const WorkSchema = new mongoose.Schema({
     },
 
     years:{
+        type: String,
+        default: null
+    },
+    description: {
         type: String,
         default: null
     }

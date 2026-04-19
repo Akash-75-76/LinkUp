@@ -1,6 +1,7 @@
 import Post from "../models/posts.model.js";
 import User from "../models/user.model.js";
 import Comment from "../models/comments.model.js";
+import mongoose from "mongoose";
 
 export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "Running" });

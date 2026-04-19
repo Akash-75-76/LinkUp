@@ -15,6 +15,9 @@ const initialState = {
     messages: [],
     userInfo: null
   },
+  notifications: [],
+  unreadNotificationCount: 0,
+  typingUsers: {},  // { [userId]: { isTyping, userName } }
   unreadCount: 0,
   isError: false,
   isLoading: false,
@@ -28,10 +31,12 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     resetChat: () => initialState,
+
     setCurrentChat: (state, action) => {
       state.currentChat.userId = action.payload.userId;
       state.currentChat.userInfo = action.payload.userInfo;
     },
+
     clearCurrentChat: (state) => {
       state.currentChat = {
         userId: null,
@@ -39,76 +44,135 @@ const chatSlice = createSlice({
         userInfo: null
       };
     },
-    // For real-time updates - add message immediately
-    addMessageToChat: (state, action) => {
-      const { message, userId } = action.payload;
-      
-      // Add to current chat if active
-      if (state.currentChat.userId === userId) {
-        state.currentChat.messages.push(message);
+
+    // ── Real-time message received via Socket.IO ──
+    receiveRealtimeMessage: (state, action) => {
+      const msg = action.payload;
+      const senderId = msg.senderId?._id || msg.senderId;
+      const receiverId = msg.receiverId?._id || msg.receiverId;
+
+      // Add to current chat if chat is open with this user
+      const chatUserId = state.currentChat.userId;
+      if (chatUserId && (senderId === chatUserId || receiverId === chatUserId)) {
+        // Avoid duplicate messages
+        const exists = state.currentChat.messages.some(
+          (m) => m._id === msg._id
+        );
+        if (!exists) {
+          state.currentChat.messages.push(msg);
+        }
       }
-      
-      // Update last message in chat rooms
-      const chatRoomIndex = state.chatRooms.findIndex(room => 
-        room.participants.some(participant => 
-          participant._id === userId || participant._id === message.senderId
+
+      // Update chat rooms list
+      const roomIndex = state.chatRooms.findIndex((room) =>
+        room.participants.some(
+          (p) => p._id === senderId || p._id === receiverId
         )
       );
-      
-      if (chatRoomIndex !== -1) {
-        state.chatRooms[chatRoomIndex].lastMessage = message;
-        state.chatRooms[chatRoomIndex].updatedAt = new Date().toISOString();
-        
+
+      if (roomIndex !== -1) {
+        state.chatRooms[roomIndex].lastMessage = msg;
+        state.chatRooms[roomIndex].updatedAt = new Date().toISOString();
+
         // Move to top
-        const updatedRoom = state.chatRooms.splice(chatRoomIndex, 1)[0];
-        state.chatRooms.unshift(updatedRoom);
+        const updated = state.chatRooms.splice(roomIndex, 1)[0];
+        state.chatRooms.unshift(updated);
       }
     },
-    // Mark messages as read locally
-    markMessagesAsReadLocal: (state, action) => {
-      const { senderId } = action.payload;
-      
-      // Mark as read in current chat
-      if (state.currentChat.userId === senderId) {
-        state.currentChat.messages.forEach(msg => {
-          if (msg.senderId === senderId) {
-            msg.isRead = true;
-          }
-        });
+
+    // ── Typing indicator ──
+    setUserTyping: (state, action) => {
+      const { userId, userName, isTyping } = action.payload;
+      if (isTyping) {
+        state.typingUsers[userId] = { isTyping: true, userName };
+      } else {
+        delete state.typingUsers[userId];
       }
-      
-      // Update unread count
-      state.unreadCount = Math.max(0, state.unreadCount - 1);
     },
-    // Update online status
+
+    // ── Online status ──
     updateUserOnlineStatus: (state, action) => {
       const { userId, isOnline, lastSeen } = action.payload;
-      
+
       // Update in chat rooms
-      state.chatRooms.forEach(room => {
-        room.participants.forEach(participant => {
+      state.chatRooms.forEach((room) => {
+        room.participants.forEach((participant) => {
           if (participant._id === userId) {
             participant.isOnline = isOnline;
             participant.lastSeen = lastSeen;
           }
         });
       });
-      
+
       // Update in current chat
-      if (state.currentChat.userInfo && state.currentChat.userInfo._id === userId) {
+      if (
+        state.currentChat.userInfo &&
+        state.currentChat.userInfo._id === userId
+      ) {
         state.currentChat.userInfo.isOnline = isOnline;
         state.currentChat.userInfo.lastSeen = lastSeen;
       }
     },
+
+    // ── Notifications ──
+    addNotification: (state, action) => {
+      state.notifications.unshift(action.payload);
+      state.unreadNotificationCount += 1;
+    },
+
+    setNotifications: (state, action) => {
+      state.notifications = action.payload;
+      state.unreadNotificationCount = action.payload.filter(
+        (n) => !n.read
+      ).length;
+    },
+
+    markNotificationRead: (state, action) => {
+      const id = action.payload;
+      const notif = state.notifications.find((n) => n._id === id);
+      if (notif) {
+        notif.read = true;
+        state.unreadNotificationCount = Math.max(
+          0,
+          state.unreadNotificationCount - 1
+        );
+      }
+    },
+
+    clearAllNotifications: (state) => {
+      state.notifications.forEach((n) => (n.read = true));
+      state.unreadNotificationCount = 0;
+    },
+
     // Open chat with specific user
     openChatWithUser: (state, action) => {
       state.currentChat.userId = action.payload._id;
       state.currentChat.userInfo = action.payload;
-    }
+    },
+
+    // Legacy — kept for compatibility
+    addMessageToChat: (state, action) => {
+      const { message, userId } = action.payload;
+      if (state.currentChat.userId === userId) {
+        state.currentChat.messages.push(message);
+      }
+    },
+
+    markMessagesAsReadLocal: (state, action) => {
+      const { senderId } = action.payload;
+      if (state.currentChat.userId === senderId) {
+        state.currentChat.messages.forEach((msg) => {
+          if (msg.senderId === senderId) {
+            msg.isRead = true;
+          }
+        });
+      }
+      state.unreadCount = Math.max(0, state.unreadCount - 1);
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Send Message
+      // Send Message (REST fallback)
       .addCase(sendMessage.pending, (state) => {
         state.isSending = true;
         state.isError = false;
@@ -116,13 +180,24 @@ const chatSlice = createSlice({
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.isSending = false;
         state.success = true;
-        
-        // Add message to current chat immediately
-        if (state.currentChat.userId === action.payload.chatMessage.receiverId) {
-          state.currentChat.messages.push(action.payload.chatMessage);
+        const chatMsg = action.payload.chatMessage;
+        const msgReceiverId = chatMsg.receiverId?._id || chatMsg.receiverId;
+        const msgSenderId = chatMsg.senderId?._id || chatMsg.senderId;
+
+        // Add to current chat if this conversation is open
+        if (
+          state.currentChat.userId &&
+          (state.currentChat.userId === msgReceiverId?.toString() ||
+           state.currentChat.userId === msgSenderId?.toString())
+        ) {
+          const exists = state.currentChat.messages.some(
+            (m) => m._id === chatMsg._id
+          );
+          if (!exists) {
+            state.currentChat.messages.push(chatMsg);
+          }
         }
-        
-        state.message = "Message sent successfully";
+        state.message = 'Message sent successfully';
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isSending = false;
@@ -138,13 +213,18 @@ const chatSlice = createSlice({
       .addCase(sendImageMessage.fulfilled, (state, action) => {
         state.isSending = false;
         state.success = true;
-        
-        // Add image message to current chat immediately
-        if (state.currentChat.userId === action.payload.chatMessage.receiverId) {
-          state.currentChat.messages.push(action.payload.chatMessage);
+        if (
+          state.currentChat.userId ===
+          action.payload.chatMessage.receiverId
+        ) {
+          const exists = state.currentChat.messages.some(
+            (m) => m._id === action.payload.chatMessage._id
+          );
+          if (!exists) {
+            state.currentChat.messages.push(action.payload.chatMessage);
+          }
         }
-        
-        state.message = "Image sent successfully";
+        state.message = 'Image sent successfully';
       })
       .addCase(sendImageMessage.rejected, (state, action) => {
         state.isSending = false;
@@ -160,15 +240,11 @@ const chatSlice = createSlice({
       .addCase(getChatHistory.fulfilled, (state, action) => {
         state.isLoading = false;
         state.success = true;
-        
         const { otherUserId, messages } = action.payload;
-        
-        // Only update if we're still viewing the same chat
         if (state.currentChat.userId === otherUserId) {
           state.currentChat.messages = messages;
         }
-        
-        state.message = "Chat history loaded";
+        state.message = 'Chat history loaded';
       })
       .addCase(getChatHistory.rejected, (state, action) => {
         state.isLoading = false;
@@ -185,7 +261,7 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.success = true;
         state.chatRooms = action.payload;
-        state.message = "Chat rooms loaded";
+        state.message = 'Chat rooms loaded';
       })
       .addCase(getChatRooms.rejected, (state, action) => {
         state.isLoading = false;
@@ -196,19 +272,15 @@ const chatSlice = createSlice({
       // Mark Messages as Read
       .addCase(markMessagesAsRead.fulfilled, (state, action) => {
         const { senderId } = action.payload;
-        
-        // Mark as read in current chat
         if (state.currentChat.userId === senderId) {
-          state.currentChat.messages.forEach(msg => {
+          state.currentChat.messages.forEach((msg) => {
             if (msg.senderId === senderId) {
               msg.isRead = true;
             }
           });
         }
-        
-        // Update unread count
         state.unreadCount = Math.max(0, state.unreadCount - 1);
-        state.message = "Messages marked as read";
+        state.message = 'Messages marked as read';
       })
       .addCase(markMessagesAsRead.rejected, (state, action) => {
         state.isError = true;
@@ -222,17 +294,23 @@ const chatSlice = createSlice({
       .addCase(getUnreadCount.rejected, (state) => {
         state.unreadCount = 0;
       });
-  }
+  },
 });
 
 export const {
   resetChat,
   setCurrentChat,
   clearCurrentChat,
+  receiveRealtimeMessage,
+  setUserTyping,
+  updateUserOnlineStatus,
+  addNotification,
+  setNotifications,
+  markNotificationRead,
+  clearAllNotifications,
+  openChatWithUser,
   addMessageToChat,
   markMessagesAsReadLocal,
-  updateUserOnlineStatus,
-  openChatWithUser
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -102,17 +102,19 @@
 .profileButton {
   background: #f8f9fa;
   color: #0077b5;
-  border: 1px solid #e0e0e0;
+  border: 5px solid #e0e0e0;
 }
 
 .dashboardButton {
   background: #0077b5;
   color: white;
+   border: 5px solid #e0e0e0;
 }
 
 .logoutButton {
   background: #dc3545;
   color: white;
+  border: 5px solid #e0e0e0;
 }
 
 .loginButton {
@@ -162,6 +164,202 @@
 }
 
 /* Responsive Design */
+
+/* ── Notification Bell ── */
+.notificationWrapper {
+  position: relative;
+}
+
+.notifButton {
+  background: #f8f9fa;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.notifButton:hover {
+  background: #eef2ff;
+  color: #667eea;
+}
+
+.notifIconActive {
+  color: #667eea !important;
+  font-size: 22px !important;
+  animation: bellRing 0.5s ease;
+}
+
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(12deg); }
+  75% { transform: rotate(-12deg); }
+}
+
+.notifBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 2px solid #fff;
+  line-height: 1;
+}
+
+.notifDropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 360px;
+  max-height: 440px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  z-index: 2000;
+  overflow: hidden;
+  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.notifHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notifHeader h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.clearAllBtn:hover {
+  background: #eef2ff;
+}
+
+.notifList {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.notifList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notifList::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.notifItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notifItem:hover {
+  background: #f3f4f6;
+}
+
+.notifItem.notifUnread {
+  background: #eef2ff;
+}
+
+.notifItem.notifUnread:hover {
+  background: #e0e7ff;
+}
+
+.notifAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.notifContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifText {
+  margin: 0;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.notifTime {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 2px;
+  display: block;
+}
+
+.notifDot {
+  width: 8px;
+  height: 8px;
+  background: #667eea;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.notifEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.notifEmptyIcon {
+  font-size: 40px !important;
+  color: #d1d5db;
+  margin-bottom: 8px;
+}
+
+.notifEmpty p {
+  margin: 0;
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
   .navbarContent {
     padding: 0 16px;
@@ -191,6 +389,11 @@
   .welcomeText {
     display: none;
   }
+
+  .notifDropdown {
+    width: 300px;
+    right: -60px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -206,5 +409,10 @@
   .buttonJoin {
     padding: 8px 12px;
     font-size: 12px;
+  }
+
+  .notifDropdown {
+    width: calc(100vw - 20px);
+    right: -100px;
   }
 }

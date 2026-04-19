@@ -136,7 +136,11 @@ export const acceptConnectionRequest = createAsyncThunk(
         token,
         requestId
       });
-      return { requestId, message: response.data.message };
+      return {
+        requestId,
+        message: response.data.message,
+        connection: response.data.connection,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }

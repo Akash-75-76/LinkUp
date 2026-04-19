@@ -10,7 +10,6 @@ import ThumbUp from '@mui/icons-material/ThumbUp';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 import ChatBubble from '@mui/icons-material/ChatBubble';
 import Share from '@mui/icons-material/Share';
-import Edit from '@mui/icons-material/Edit';
 import Delete from '@mui/icons-material/Delete';
 import Send from '@mui/icons-material/Send';
 import Description from '@mui/icons-material/Description';
@@ -24,8 +23,6 @@ const PostFeed = () => {
   const { posts, isLoading } = useSelector((state) => state.posts);
   const { user, loggedIn } = useSelector((state) => state.auth);
   const [commentText, setCommentText] = useState({});
-  const [editingComment, setEditingComment] = useState(null);
-  const [editCommentText, setEditCommentText] = useState("");
   const [hasFetchedPosts, setHasFetchedPosts] = useState(false);
 
   useEffect(() => {
@@ -51,21 +48,7 @@ const PostFeed = () => {
     dispatch(deleteComment({ token: user.token, postId, commentId }));
   };
 
-  const startEditComment = (comment) => {
-    setEditingComment(comment._id);
-    setEditCommentText(comment.body);
-  };
 
-  const cancelEditComment = () => {
-    setEditingComment(null);
-    setEditCommentText("");
-  };
-
-  const saveEditComment = (postId, commentId) => {
-    console.log("Edit comment:", postId, commentId, editCommentText);
-    setEditingComment(null);
-    setEditCommentText("");
-  };
 
   if (isLoading) {
     return (
@@ -179,10 +162,18 @@ const PostFeed = () => {
                 <button
                   onClick={() => handleLike(post._id)}
                   className={`${styles.actionButton} ${
-                    post.likes?.includes(user?._id) ? styles.liked : ''
+                    post.likes?.some(like => 
+                      like === user?._id || 
+                      like?._id === user?._id ||
+                      like?.toString() === user?._id?.toString()
+                    ) ? styles.liked : ''
                   }`}
                 >
-                  {post.likes?.includes(user?._id) ? (
+                  {post.likes?.some(like => 
+                    like === user?._id || 
+                    like?._id === user?._id ||
+                    like?.toString() === user?._id?.toString()
+                  ) ? (
                     <ThumbUpAlt className={styles.actionIcon} />
                   ) : (
                     <ThumbUp className={styles.actionIcon} />
@@ -222,7 +213,7 @@ const PostFeed = () => {
                       }))
                     }
                     className={styles.commentInput}
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter' && commentText[post._id]?.trim()) {
                         handleAddComment(post._id);
                       }
@@ -262,41 +253,10 @@ const PostFeed = () => {
                       </div>
                     </div>
 
-                    {editingComment === comment._id ? (
-                      <div className={styles.editComment}>
-                        <input
-                          type="text"
-                          value={editCommentText}
-                          onChange={(e) => setEditCommentText(e.target.value)}
-                          className={styles.editInput}
-                        />
-                        <div className={styles.editActions}>
-                          <button
-                            onClick={() => saveEditComment(post._id, comment._id)}
-                            className={styles.saveButton}
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={cancelEditComment}
-                            className={styles.cancelButton}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className={styles.commentContent}>
+                    <div className={styles.commentContent}>
                         <p className={styles.commentText}>{comment.body}</p>
                         {user?._id === comment.userId?._id && (
                           <div className={styles.commentActions}>
-                            <button
-                              onClick={() => startEditComment(comment)}
-                              className={styles.editButton}
-                            >
-                              <Edit className={styles.buttonIcon} />
-                              Edit
-                            </button>
                             <button
                               onClick={() =>
                                 handleDeleteComment(post._id, comment._id)
@@ -309,7 +269,6 @@ const PostFeed = () => {
                           </div>
                         )}
                       </div>
-                    )}
                   </div>
                 ))}
               </div>

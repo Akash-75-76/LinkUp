@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getChatRooms } from '@/config/redux/action/chatAction'; // Fix import - from actions, not reducer
-import { openChatWithUser } from '@/config/redux/reducer/chatReducer'; // This import is correct
+import { getChatRooms } from '@/config/redux/action/chatAction';
+import { openChatWithUser } from '@/config/redux/reducer/chatReducer';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
@@ -14,7 +14,7 @@ const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useSelector((state) => state.auth);
-  const { chatRooms, isLoading, unreadCount } = useSelector((state) => state.chat);
+  const { chatRooms, isLoading, typingUsers } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -35,8 +35,30 @@ const ChatWidget = () => {
 
   const handleOpenChat = (otherUser) => {
     dispatch(openChatWithUser(otherUser));
-    setIsOpen(false); // Close the chat list when opening a chat
+    setIsOpen(false);
   };
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  // Count total unread messages
+  const totalUnread = chatRooms?.reduce((count, room) => {
+    if (room.lastMessage && !room.lastMessage.isRead && 
+        (room.lastMessage.senderId?._id || room.lastMessage.senderId) !== user?._id) {
+      return count + 1;
+    }
+    return count;
+  }, 0) || 0;
 
   if (!user) return null;
 
@@ -45,13 +67,13 @@ const ChatWidget = () => {
       {/* Floating Chat Button */}
       <div className={styles.chatWidget}>
         <button 
-          className={styles.chatToggle}
+          className={`${styles.chatToggle} ${isOpen ? styles.open : ''}`}
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <CloseIcon /> : <ChatIcon />}
-          {!isOpen && unreadCount > 0 && (
+          {!isOpen && totalUnread > 0 && (
             <span className={styles.notificationBadge}>
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {totalUnread > 9 ? '9+' : totalUnread}
             </span>
           )}
         </button>
@@ -61,7 +83,12 @@ const ChatWidget = () => {
       {isOpen && (
         <div className={styles.chatPanel}>
           <div className={styles.chatHeader}>
-            <h3>Messages</h3>
+            <div className={styles.headerTop}>
+              <h3>Messages</h3>
+              <span className={styles.roomCount}>
+                {chatRooms?.length || 0} conversations
+              </span>
+            </div>
             <div className={styles.searchContainer}>
               <SearchIcon className={styles.searchIcon} />
               <input
@@ -76,17 +103,27 @@ const ChatWidget = () => {
 
           <div className={styles.chatContent}>
             {isLoading ? (
-              <div className={styles.loading}>Loading conversations...</div>
+              <div className={styles.loading}>
+                <div className={styles.loadingDots}>
+                  <span></span><span></span><span></span>
+                </div>
+                <p>Loading conversations...</p>
+              </div>
             ) : filteredChatRooms?.length > 0 ? (
               <div className={styles.chatList}>
                 {filteredChatRooms.map(room => {
                   const otherUser = getOtherParticipant(room.participants);
                   if (!otherUser) return null;
                   
+                  const isTyping = typingUsers[otherUser._id]?.isTyping;
+                  const isUnread = room.lastMessage && 
+                    !room.lastMessage.isRead && 
+                    (room.lastMessage.senderId?._id || room.lastMessage.senderId) !== user._id;
+                  
                   return (
                     <div
                       key={room._id}
-                      className={styles.chatItem}
+                      className={`${styles.chatItem} ${isUnread ? styles.unreadItem : ''}`}
                       onClick={() => handleOpenChat(otherUser)}
                     >
                       <div className={styles.userAvatar}>
@@ -97,29 +134,28 @@ const ChatWidget = () => {
                           }
                           alt={otherUser?.name}
                         />
-                        <CircleIcon className={`${styles.onlineIndicator} ${
+                        <span className={`${styles.onlineIndicator} ${
                           otherUser?.isOnline ? styles.online : styles.offline
                         }`} />
                       </div>
                       <div className={styles.chatInfo}>
-                        <h4>{otherUser?.name}</h4>
-                        <p className={styles.lastMessage}>
-                          {room.lastMessage?.messageType === 'image' 
-                            ? '📷 Image' 
-                            : (room.lastMessage?.message || 'No messages yet')
-                          }
-                        </p>
-                      </div>
-                      <div className={styles.chatMeta}>
-                        <span className={styles.messageTime}>
-                          {room.lastMessage && new Date(room.lastMessage.createdAt).toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
-                        {room.lastMessage && !room.lastMessage?.isRead && room.lastMessage?.senderId !== user._id && (
-                          <span className={styles.unreadBadge}></span>
-                        )}
+                        <div className={styles.chatInfoTop}>
+                          <h4>{otherUser?.name}</h4>
+                          <span className={styles.messageTime}>
+                            {room.lastMessage && formatTime(room.lastMessage.createdAt || room.updatedAt)}
+                          </span>
+                        </div>
+                        <div className={styles.chatInfoBottom}>
+                          <p className={styles.lastMessage}>
+                            {isTyping ? (
+                              <span className={styles.typingPreview}>typing...</span>
+                            ) : room.lastMessage?.messageType === 'image' 
+                              ? '📷 Image' 
+                              : (room.lastMessage?.message || 'No messages yet')
+                            }
+                          </p>
+                          {isUnread && <span className={styles.unreadDot} />}
+                        </div>
                       </div>
                     </div>
                   );
@@ -127,9 +163,9 @@ const ChatWidget = () => {
               </div>
             ) : (
               <div className={styles.noChats}>
-                <ChatIcon className={styles.noChatsIcon} />
+                <div className={styles.noChatsEmoji}>💬</div>
                 <p>No conversations yet</p>
-                <span>Start a conversation with your connections</span>
+                <span>Start chatting with your connections</span>
               </div>
             )}
           </div>

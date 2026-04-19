@@ -10,6 +10,7 @@ import {
   removeConnection,
   getSentConnectionRequests
 } from '@/config/redux/action/authAction'
+import { openChatWithUser } from '@/config/redux/reducer/chatReducer'
 import styles from "./myConnections.module.css"
 import { useRouter } from 'next/router'
 
@@ -330,9 +331,7 @@ function MyConnectionsPage() {
   </button>
   <button 
     onClick={() => {
-      // This will be implemented to open chat with this connection
-      // We'll add this functionality after setting up the chat widget
-      alert(`Open chat with ${connectionUser.name}`);
+      dispatch(openChatWithUser(connectionUser));
     }}
     className={styles.messageBtn}
     title="Send message"

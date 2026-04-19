@@ -113,7 +113,7 @@ export default function Home() {
                       <div className={styles.cardHeader}>
                         <div className={styles.cardAvatar}></div>
                         <div className={styles.cardInfo}>
-                          <span className={styles.cardName}>Kshitij Walke</span>
+                          <span className={styles.cardName}>Parth</span>
                           <span className={styles.cardTitle}>Intern</span>
                         </div>
                         <CheckCircle className={styles.verifiedIcon} />

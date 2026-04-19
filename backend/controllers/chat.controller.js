@@ -51,7 +51,7 @@ export const sendMessage = async (req, res) => {
     await chatRoom.save();
 
     // Populate sender info
-    await newMessage.populate('senderId', 'name username profilePicture');
+    await newMessage.populate('senderId', 'name username profilePicture isOnline lastSeen');
 
     return res.status(201).json({
       message: "Message sent successfully",
@@ -118,7 +118,7 @@ export const sendImageMessage = async (req, res) => {
     await chatRoom.save();
 
     // Populate sender info
-    await newMessage.populate('senderId', 'name username profilePicture');
+    await newMessage.populate('senderId', 'name username profilePicture isOnline lastSeen');
 
     return res.status(201).json({
       message: "Image sent successfully",
@@ -145,8 +145,8 @@ export const getChatHistory = async (req, res) => {
         { senderId: otherUserId, receiverId: user._id }
       ]
     })
-    .populate('senderId', 'name username profilePicture')
-    .populate('receiverId', 'name username profilePicture')
+    .populate('senderId', 'name username profilePicture isOnline lastSeen')
+    .populate('receiverId', 'name username profilePicture isOnline lastSeen')
     .sort({ createdAt: 1 });
 
     return res.status(200).json(messages);
@@ -168,12 +168,12 @@ export const getChatRooms = async (req, res) => {
     const chatRooms = await ChatRoom.find({
       participants: user._id
     })
-    .populate('participants', 'name username profilePicture')
+    .populate('participants', 'name username profilePicture isOnline lastSeen')
     .populate({
       path: 'lastMessage',
       populate: {
         path: 'senderId',
-        select: 'name username profilePicture'
+        select: 'name username profilePicture isOnline lastSeen'
       }
     })
     .sort({ updatedAt: -1 });

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllPosts } from '@/config/redux/action/postAction';
+import { useSelector } from 'react-redux';
+
 import UserLayout from '@/layout/userLayout';
 import DashboardLayout from "../../layout/Dashboardlayout/index"
 import PostFeed from '@/Components/PostFeed';
@@ -18,10 +18,8 @@ import styles from './dashboard.module.css';
 
 const Dashboard = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
   const authState = useSelector((state) => state.auth);
-  const [isTokenThere, setIsTokenThere] = useState(false);
-  const [hasFetchedData, setHasFetchedData] = useState(false);
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -35,12 +33,7 @@ const Dashboard = () => {
     }
   }, [authState.isTokenThere, router]);
 
-  useEffect(() => {
-    if (isTokenThere && !hasFetchedData) {
-      dispatch(getAllPosts());
-      setHasFetchedData(true);
-    }
-  }, [isTokenThere, hasFetchedData, dispatch]);
+
 
   return (
     <UserLayout>

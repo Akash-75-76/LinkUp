@@ -2,7 +2,9 @@ import UserLayout from '@/layout/userLayout'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSelector, useDispatch } from 'react-redux'
-import { sendConnectionRequest } from '@/config/redux/action/authAction'
+import { sendConnectionRequest, getSentConnectionRequests, whatAreMyConnections, getMyConnectionRequests } from '@/config/redux/action/authAction'
+import { API_BASE_URL, UPLOADS_BASE_URL } from '@/config'
+import { idEq } from '@/utils/id'
 import { openChatWithUser } from '@/config/redux/reducer/chatReducer' // Add this import
 import styles from "./profile.module.css"
 
@@ -34,21 +36,40 @@ function UserProfile() {
   const [isLoading, setIsLoading] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState('not_connected')
   const [activeTab, setActiveTab] = useState('about')
-  const [postsCount, setPostsCount] = useState(0) // ✅ Add posts count state
+  const [postsCount, setPostsCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
+  const [connectionsCount, setConnectionsCount] = useState(0)
 
   useEffect(() => {
     if (id) {
       fetchUserProfile(id)
-      checkConnectionStatus(id)
       fetchUserPostsCount(id)
+      fetchFollowingCount(id)
+      fetchConnectionsCount(id)
+      // Always re-fetch connection state so status is current
+      if (authState.user?.token) {
+        Promise.all([
+          dispatch(whatAreMyConnections({ token: authState.user.token })),
+          dispatch(getSentConnectionRequests({ token: authState.user.token })),
+          dispatch(getMyConnectionRequests({ token: authState.user.token })),
+        ]).then(() => {
+          checkConnectionStatus(id)
+        })
+      }
     }
   }, [id])
+
+  // Re-check status whenever Redux connection data updates
+  useEffect(() => {
+    if (id) {
+      checkConnectionStatus(id)
+    }
+  }, [id, authState.connections, authState.sentConnectionRequests, authState.connectionRequests])
 
   const fetchUserProfile = async (userId) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`https://linkup-o722.onrender.com/api/users/profile/${userId}`)
+      const response = await fetch(`${API_BASE_URL}/users/profile/${userId}`)
       if (!response.ok) {
         throw new Error('Profile not found')
       }
@@ -62,25 +83,36 @@ function UserProfile() {
     }
   }
 
-  const checkConnectionStatus = (userId) => {
-    if (authState.connections?.some(conn => 
-      conn.userId?._id === userId || conn.connectionId?._id === userId
-    )) {
+  const checkConnectionStatus = (profileUserId) => {
+    const uid = String(profileUserId)
+    if (
+      authState.connections?.some(
+        (conn) =>
+          idEq(conn.userId?._id || conn.userId, uid) ||
+          idEq(conn.connectionId?._id || conn.connectionId, uid)
+      )
+    ) {
       setConnectionStatus('connected')
-    } else if (authState.connectionRequests?.some(req => 
-      req.userId?._id === userId
-    )) {
+    } else if (
+      authState.sentConnectionRequests?.some((req) =>
+        idEq(req.connectionId?._id || req.connectionId, uid)
+      )
+    ) {
       setConnectionStatus('request_sent')
-    } else if (authState.sentConnectionRequests?.some(req => 
-      req.connectionId?._id === userId
-    )) {
-      setConnectionStatus('request_pending')
+    } else if (
+      authState.connectionRequests?.some((req) =>
+        idEq(req.userId?._id || req.userId, uid)
+      )
+    ) {
+      setConnectionStatus('request_received')
+    } else {
+      setConnectionStatus('not_connected')
     }
   }
 
    const fetchUserPostsCount = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/user_posts_count?userId=${userId}`)
+      const response = await fetch(`${API_BASE_URL}/posts/user_posts_count?userId=${userId}`)
       if (!response.ok) {
         throw new Error('Failed to fetch posts count')
       }
@@ -94,7 +126,7 @@ function UserProfile() {
 
    const fetchFollowingCount = async (userId) => {
   try {
-    const response = await fetch(`https://linkup-o722.onrender.com/api/users/following_count?userId=${userId}`)
+    const response = await fetch(`${API_BASE_URL}/users/following_count?userId=${userId}`)
     if (response.ok) {
       const data = await response.json()
       setFollowingCount(data.count || 0)
@@ -106,6 +138,27 @@ function UserProfile() {
     setFollowingCount(0)
   }
 }
+
+  const fetchConnectionsCount = async (userId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/my_connections?token=${authState.user?.token}`)
+      if (response.ok) {
+        const data = await response.json()
+        // Count connections where this userId is involved
+        const count = data.filter(
+          (conn) =>
+            idEq(conn.userId?._id || conn.userId, userId) ||
+            idEq(conn.connectionId?._id || conn.connectionId, userId)
+        ).length
+        setConnectionsCount(count)
+      } else {
+        setConnectionsCount(0)
+      }
+    } catch (error) {
+      console.error('Error fetching connections count:', error)
+      setConnectionsCount(0)
+    }
+  }
   const handleConnect = async () => {
     if (!authState.user?.token || !id) return
     
@@ -143,7 +196,9 @@ function UserProfile() {
     if (!userProfile) return
     
     try {
-      const response = await fetch(`https://linkup-o722.onrender.com/api/users/download_profile?user_id=${userProfile.userId?._id || userProfile._id}`)
+      const response = await fetch(
+        `${API_BASE_URL}/users/download_profile?user_id=${userProfile.userId?._id || userProfile._id}`
+      )
       if (!response.ok) {
         throw new Error('Failed to download resume')
       }
@@ -165,9 +220,9 @@ function UserProfile() {
   const getConnectButtonText = () => {
     switch(connectionStatus) {
       case 'connected':
-        return 'Connected'
+        return 'Following'
       case 'request_sent':
-        return 'Request Sent'
+        return 'Pending'
       case 'request_pending':
         return 'Respond to Request'
       default:
@@ -222,7 +277,7 @@ function UserProfile() {
             <div className={styles.avatarSection}>
               <img 
                 src={userData.profilePicture && userData.profilePicture !== 'default.jpg' ? 
-                  `https://linkup-o722.onrender.com/uploads/${userData.profilePicture}` : 
+                  `${UPLOADS_BASE_URL}/uploads/${userData.profilePicture}` : 
                   DEFAULT_AVATAR
                 } 
                 alt={userData.name}
@@ -259,7 +314,7 @@ function UserProfile() {
               <div className={styles.profileStats}>
     <div className={styles.stat}>
       <GroupsIcon className={styles.statIcon} />
-      <span className={styles.statNumber}>{authState.connections?.length || 0}</span>
+      <span className={styles.statNumber}>{connectionsCount}</span>
       <span className={styles.statLabel}>Connections</span>
     </div>
     <div className={styles.stat}>

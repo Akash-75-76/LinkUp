@@ -60,7 +60,28 @@ const authSlice = createSlice({
       state.sentConnectionRequests.push(action.payload);
     },
     addConnection: (state, action) => {
-      state.connections.push(action.payload);
+      const pid = action.payload?._id;
+      if (pid == null) return;
+      const exists = state.connections.some(
+        (c) => String(c._id) === String(pid)
+      );
+      if (!exists) state.connections.push(action.payload);
+    },
+    removeSentConnectionRequest: (state, action) => {
+      const key = String(action.payload);
+      state.sentConnectionRequests = state.sentConnectionRequests.filter(
+        (req) =>
+          String(req._id) !== key &&
+          String(req.connectionId?._id || req.connectionId) !== key
+      );
+    },
+    removeConnectionRequest: (state, action) => {
+      const key = String(action.payload);
+      state.connectionRequests = state.connectionRequests.filter(
+        (req) =>
+          String(req._id) !== key &&
+          String(req.userId?._id || req.userId) !== key
+      );
     }
   },
   extraReducers: (builder) => {
@@ -226,18 +247,21 @@ const authSlice = createSlice({
 
       // Accept Connection Request - FIXED: Add the new connection to connections array
       .addCase(acceptConnectionRequest.fulfilled, (state, action) => {
-        // Remove from connection requests
+        const rid = String(action.payload.requestId);
         state.connectionRequests = state.connectionRequests.filter(
-          request => request._id !== action.payload.requestId
+          (request) => String(request._id) !== rid
         );
-        
-        // Add to connections if the backend returns the connection data
+
         if (action.payload.connection) {
-          state.connections.push(action.payload.connection);
+          const conn = action.payload.connection;
+          const cid = conn._id;
+          const dup = state.connections.some(
+            (c) => String(c._id) === String(cid)
+          );
+          if (!dup) state.connections.push(conn);
         }
-        
+
         state.message = action.payload.message;
-        console.log('Connection request accepted, removed from requests');
       })
       .addCase(acceptConnectionRequest.rejected, (state, action) => {
         state.isError = true;
@@ -246,8 +270,9 @@ const authSlice = createSlice({
 
       // Reject Connection Request
       .addCase(rejectConnectionRequest.fulfilled, (state, action) => {
+        const rid = String(action.payload.requestId);
         state.connectionRequests = state.connectionRequests.filter(
-          request => request._id !== action.payload.requestId
+          (request) => String(request._id) !== rid
         );
         state.message = action.payload.message;
         console.log('Connection request rejected, removed from requests');
@@ -259,11 +284,11 @@ const authSlice = createSlice({
 
       // Remove Connection - FIXED: Better filtering logic
       .addCase(removeConnection.fulfilled, (state, action) => {
-        state.connections = state.connections.filter(conn => {
-          // Check both userId and connectionId with safe access
-          const userId = conn.userId?._id || conn.userId;
-          const connectionId = conn.connectionId?._id || conn.connectionId;
-          return userId !== action.payload.connectionId && connectionId !== action.payload.connectionId;
+        const removed = String(action.payload.connectionId);
+        state.connections = state.connections.filter((conn) => {
+          const uid = conn.userId?._id || conn.userId;
+          const cid = conn.connectionId?._id || conn.connectionId;
+          return String(uid) !== removed && String(cid) !== removed;
         });
         state.message = action.payload.message;
         console.log('Connection removed, remaining:', state.connections.length);

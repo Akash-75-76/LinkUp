@@ -14,8 +14,6 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GroupsIcon from "@mui/icons-material/Groups";
 import WorkIcon from "@mui/icons-material/Work";
 import InsightsIcon from "@mui/icons-material/Insights";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 function LoginComponent() {
@@ -27,7 +25,6 @@ function LoginComponent() {
 
   const [email, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     if (authState.loggedIn) {
@@ -42,7 +39,7 @@ function LoginComponent() {
     setIsSubmitting(true);
     
     try {
-      await dispatch(loginUser({ email, password, rememberMe })).unwrap();
+      await dispatch(loginUser({ email, password })).unwrap();
     } catch (error) {
       console.error("Authentication error:", error);
     } finally {
@@ -106,20 +103,6 @@ function LoginComponent() {
               </div>
 
               <div className={styles.rememberMe}>
-                <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className={styles.checkbox}
-                  />
-                  {rememberMe ? (
-                    <CheckBoxIcon className={styles.checkboxIcon} />
-                  ) : (
-                    <CheckBoxOutlineBlankIcon className={styles.checkboxIcon} />
-                  )}
-                  <span className={styles.checkboxText}>Remember me</span>
-                </label>
                 <a href="#" className={styles.forgotPassword}>
                   Forgot password?
                 </a>
@@ -164,11 +147,11 @@ function LoginComponent() {
                 <span>Or continue with</span>
               </div>
               <div className={styles.socialButtons}>
-                <button type="button" className={styles.socialButton}>
+                <button type="button" className={styles.socialButton} disabled title="Coming soon">
                   <GoogleIcon className={styles.socialIcon} />
                   Google
                 </button>
-                <button type="button" className={styles.socialButton}>
+                <button type="button" className={styles.socialButton} disabled title="Coming soon">
                   <LinkedInIcon className={styles.socialIcon} />
                   LinkedIn
                 </button>

@@ -54,7 +54,42 @@ const ChatRoomSchema = new mongoose.Schema({
   }
 });
 
+const NotificationSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['message', 'connection_request', 'connection_accepted', 'post_like', 'post_comment'],
+    required: true
+  },
+  from: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  to: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  read: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 const Message = mongoose.model('Message', MessageSchema);
 const ChatRoom = mongoose.model('ChatRoom', ChatRoomSchema);
+const Notification = mongoose.model('Notification', NotificationSchema);
 
-export { Message, ChatRoom };
+export { Message, ChatRoom, Notification };

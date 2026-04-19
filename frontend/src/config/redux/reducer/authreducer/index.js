@@ -326,6 +326,8 @@ export const {
   updateUserData,
   addConnectionRequest,
   addSentConnectionRequest,
-  addConnection
+  addConnection,
+  removeSentConnectionRequest,
+  removeConnectionRequest
 } = authSlice.actions;
 export default authSlice.reducer;

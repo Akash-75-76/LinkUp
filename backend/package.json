@@ -13,6 +13,8 @@
   "author": "Akash Deshmukh",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1032.0",
+    "@aws-sdk/lib-storage": "^3.1032.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -20,6 +22,7 @@
     "express": "^5.1.0",
     "mongoose": "^8.18.3",
     "multer": "^2.0.2",
+    "multer-s3": "^3.0.1",
     "nodemon": "^3.1.10",
     "pdf-creator-node": "^2.3.5",
     "pdfkit": "^0.17.2",

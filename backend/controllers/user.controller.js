@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import ConnectionRequest from "../models/connections.model.js";
 import Follow from "../models/follow.model.js";
+import { uploadToS3, deleteFromS3 } from "../config/s3.js";
 import Post from "../models/posts.model.js";
 import { Notification } from "../models/chat.model.js";
 import { emitToUser, emitRelationshipUpdate } from "../socket.js";
@@ -59,7 +60,21 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "No data received" });
     }
 
-    const { name, username, email, password, bio, currentPost, education, pastWork } = req.body;
+    let { name, username, email, password, bio, currentPost, education, pastWork } = req.body;
+    
+    // ✅ Parse JSON strings from FormData
+    try {
+      if (typeof education === 'string') {
+        education = JSON.parse(education);
+      }
+      if (typeof pastWork === 'string') {
+        pastWork = JSON.parse(pastWork);
+      }
+    } catch (parseError) {
+      console.warn("Error parsing education/pastWork JSON:", parseError);
+      education = education || [];
+      pastWork = pastWork || [];
+    }
     
     // ✅ FIX: Remove JSON parsing - use arrays directly
     console.log("Education received:", education);
@@ -67,8 +82,18 @@ export const register = async (req, res) => {
     console.log("Education type:", typeof education);
     console.log("Past Work type:", typeof pastWork);
 
-    // ✅ FIX: Handle file upload separately (since you're not using FormData for registration)
-    const profilePicture = "default.jpg"; // Default for now, you handle separately
+    // ✅ Handle profile picture upload to S3
+    let profilePicture = "default.jpg";
+    if (req.file) {
+      try {
+        const s3Url = await uploadToS3(req.file.buffer, req.file.originalname, 'profile-pictures');
+        profilePicture = s3Url;
+        console.log("Profile picture uploaded to S3:", profilePicture);
+      } catch (error) {
+        console.error("Failed to upload profile picture to S3:", error);
+        // Continue with default if S3 upload fails
+      }
+    }
 
     console.log("=== BACKEND DEBUG: PARSED DATA ===");
     console.log("Basic info:", { name, username, email });
@@ -172,7 +197,7 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-// FIX: uploadProfilePic should handle file upload
+// Upload profile picture to S3
 export const uploadProfilePic = async (req, res) => {
   try {
     const { token } = req.body;
@@ -186,19 +211,36 @@ export const uploadProfilePic = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    console.log("Profile picture upload:", {
-      userId: user._id,
-      filename: req.file.filename
-    });
+    try {
+      // Upload to S3
+      const s3Url = await uploadToS3(req.file.buffer, req.file.originalname, 'profile-pictures');
+      
+      console.log("Profile picture uploaded to S3:", {
+        userId: user._id,
+        s3Url: s3Url
+      });
 
-    // Update user profile picture
-    user.profilePicture = req.file.filename;
-    await user.save();
+      // Delete old profile picture from S3 if exists and not default
+      if (user.profilePicture && user.profilePicture !== "default.jpg" && user.profilePicture.includes('s3')) {
+        try {
+          await deleteFromS3(user.profilePicture);
+        } catch (deleteError) {
+          console.warn("Failed to delete old profile picture from S3:", deleteError);
+        }
+      }
 
-    return res.status(200).json({ 
-      message: "Profile picture updated successfully",
-      profilePicture: req.file.filename 
-    });
+      // Update user with new profile picture URL
+      user.profilePicture = s3Url;
+      await user.save();
+
+      return res.status(200).json({ 
+        message: "Profile picture uploaded successfully",
+        profilePicture: s3Url 
+      });
+    } catch (s3Error) {
+      console.error("S3 upload error:", s3Error);
+      return res.status(500).json({ message: "Failed to upload to S3: " + s3Error.message });
+    }
   } catch (error) {
     console.error("Profile picture upload error:", error);
     return res.status(500).json({ message: error.message });

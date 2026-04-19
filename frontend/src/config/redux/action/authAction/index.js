@@ -41,40 +41,30 @@ export const registerUser = createAsyncThunk(
       });
       console.log("=== END AUTH ACTION DEBUG ===");
       
-      // ✅ SIMPLIFIED: Use regular JSON for now, we'll add file upload separately
-      const response = await clientServer.post('/users/register', {
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        password: user.password,
-        bio: user.bio || "",
-        currentPost: user.currentPost || "",
-        education: user.education || [],
-        pastWork: user.pastWork || []
-        // We'll handle profile picture separately after registration
+      // ✅ USE FormData to send file + data in single request
+      const formData = new FormData();
+      formData.append('name', user.name);
+      formData.append('username', user.username);
+      formData.append('email', user.email);
+      formData.append('password', user.password);
+      formData.append('bio', user.bio || "");
+      formData.append('currentPost', user.currentPost || "");
+      formData.append('education', JSON.stringify(user.education || []));
+      formData.append('pastWork', JSON.stringify(user.pastWork || []));
+      
+      // ✅ Append profile picture if present
+      if (user.profilePicture) {
+        formData.append('profile_pic', user.profilePicture);
+        console.log("Profile picture added to FormData");
+      }
+      
+      const response = await clientServer.post('/users/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       
       console.log("Register API response:", response.data);
-      
-      // ✅ NEW: If we have a profile picture, upload it separately after registration
-      if (user.profilePicture && response.data.token) {
-        console.log("Uploading profile picture separately...");
-        try {
-          const profileFormData = new FormData();
-          profileFormData.append('profile_pic', user.profilePicture);
-          profileFormData.append('token', response.data.token);
-          
-          await clientServer.post('/users/update_profile_pic', profileFormData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-          console.log("Profile picture uploaded successfully");
-        } catch (uploadError) {
-          console.error("Profile picture upload failed:", uploadError);
-          // Continue without profile picture - it's optional
-        }
-      }
       
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);

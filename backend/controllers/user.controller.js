@@ -51,36 +51,62 @@ const convertUserDataTOPDF = async (userProfile) => {
 
 export const register = async (req, res) => {
   try {
-    console.log("=== BACKEND DEBUG: REQUEST RECEIVED ===");
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file);
-    console.log("=== END BACKEND DEBUG ===");
-
-    if (!req.body) {
-      return res.status(400).json({ message: "No data received" });
-    }
+    console.log("\n🔴 === REGISTRATION REQUEST START ===");
+    console.log("Content-Type header:", req.headers['content-type']);
+    console.log("All headers:", JSON.stringify(req.headers, null, 2));
+    console.log("1️⃣  Raw req.body object:", JSON.stringify(req.body, null, 2));
+    console.log("2️⃣  Raw req.body keys:", Object.keys(req.body));
+    console.log("3️⃣  Raw req.file:", req.file ? { fieldname: req.file.fieldname, size: req.file.size, mimetype: req.file.mimetype } : "NO FILE");
+    console.log("4️⃣  req.body.education:", req.body.education, "typeof:", typeof req.body.education);
+    console.log("5️⃣  req.body.pastWork:", req.body.pastWork, "typeof:", typeof req.body.pastWork);
 
     let { name, username, email, password, bio, currentPost, education, pastWork } = req.body;
+    console.log("6️⃣  After destructuring - education:", education, "type:", typeof education);
+    console.log("6️⃣  After destructuring - name:", name, "username:", username, "email:", email);
     
-    // ✅ Parse JSON strings from FormData
-    try {
-      if (typeof education === 'string') {
-        education = JSON.parse(education);
+    // ✅ ROBUST: Parse JSON strings from FormData - handle all cases
+    const parseJSONArray = (field, fieldName) => {
+      if (Array.isArray(field)) {
+        console.log(`✅ ${fieldName} already array:`, field);
+        return field;
       }
-      if (typeof pastWork === 'string') {
-        pastWork = JSON.parse(pastWork);
+      
+      if (typeof field === 'string') {
+        if (field.trim().length === 0) {
+          console.log(`⚠️  ${fieldName} is empty string, using empty array`);
+          return [];
+        }
+        
+        try {
+          const parsed = JSON.parse(field);
+          if (Array.isArray(parsed)) {
+            console.log(`✅ Successfully parsed ${fieldName}:`, parsed);
+            return parsed;
+          } else {
+            console.warn(`⚠️  ${fieldName} parsed but not an array:`, parsed);
+            return [];
+          }
+        } catch (err) {
+          console.error(`❌ Failed to parse ${fieldName}:`, err.message, "value:", field);
+          return [];
+        }
       }
-    } catch (parseError) {
-      console.warn("Error parsing education/pastWork JSON:", parseError);
-      education = education || [];
-      pastWork = pastWork || [];
-    }
+      
+      console.warn(`⚠️  ${fieldName} is neither string nor array:`, field);
+      return [];
+    };
     
-    // ✅ FIX: Remove JSON parsing - use arrays directly
-    console.log("Education received:", education);
-    console.log("Past Work received:", pastWork);
-    console.log("Education type:", typeof education);
-    console.log("Past Work type:", typeof pastWork);
+    education = parseJSONArray(education, 'education');
+    pastWork = parseJSONArray(pastWork, 'pastWork');
+    
+    console.log("Final arrays:", { 
+      education: education,
+      educationType: typeof education,
+      educationLength: Array.isArray(education) ? education.length : 0,
+      pastWork: pastWork,
+      pastWorkType: typeof pastWork,
+      pastWorkLength: Array.isArray(pastWork) ? pastWork.length : 0
+    });
 
     // ✅ Handle profile picture upload to S3
     let profilePicture = "default.jpg";
@@ -93,20 +119,27 @@ export const register = async (req, res) => {
         console.error("Failed to upload profile picture to S3:", error);
         // Continue with default if S3 upload fails
       }
+    } else {
+      console.log("No profile picture file received");
     }
-
-    console.log("=== BACKEND DEBUG: PARSED DATA ===");
-    console.log("Basic info:", { name, username, email });
-    console.log("Profile info:", { bio, currentPost });
-    console.log("Education:", education);
-    console.log("Education length:", education ? education.length : 0);
-    console.log("Past Work:", pastWork);
-    console.log("Past Work length:", pastWork ? pastWork.length : 0);
-    console.log("=== END BACKEND DEBUG ===");
 
     // Validation
     if (!name || !username || !email || !password) {
-      return res.status(400).json({ message: "All required fields are missing" });
+      console.error("Validation failed. Missing fields:", { 
+        name: !name ? "MISSING" : "OK",
+        username: !username ? "MISSING" : "OK",
+        email: !email ? "MISSING" : "OK",
+        password: !password ? "MISSING" : "OK"
+      });
+      return res.status(400).json({ 
+        message: "All required fields are required: name, username, email, password",
+        missing: {
+          name: !name,
+          username: !username,
+          email: !email,
+          password: !password
+        }
+      });
     }
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -123,26 +156,33 @@ export const register = async (req, res) => {
       profilePicture: profilePicture,
     });
     await newUser.save();
+    console.log("User created:", newUser._id);
 
     // Create profile with all the data
     const profileData = {
       userId: newUser._id,
       bio: bio || "",
       currentPost: currentPost || "",
-      // ✅ FIX: Use arrays directly
-      education: education || [],
-      pastWork: pastWork || []
+      education: Array.isArray(education) ? education : (typeof education === 'string' ? JSON.parse(education) : []),
+      pastWork: Array.isArray(pastWork) ? pastWork : (typeof pastWork === 'string' ? JSON.parse(pastWork) : [])
     };
 
-    console.log("=== BACKEND DEBUG: FINAL PROFILE DATA ===");
-    console.log("Profile data being saved:", profileData);
-    console.log("=== END BACKEND DEBUG ===");
+    console.log("✅ Creating profile with data:", {
+      educationCount: Array.isArray(profileData.education) ? profileData.education.length : 0,
+      educationType: Array.isArray(profileData.education) ? 'array' : typeof profileData.education,
+      pastWorkCount: Array.isArray(profileData.pastWork) ? profileData.pastWork.length : 0,
+      pastWorkType: Array.isArray(profileData.pastWork) ? 'array' : typeof profileData.pastWork,
+      educationValue: profileData.education,
+      pastWorkValue: profileData.pastWork
+    });
 
     const profile = new Profile(profileData);
     await profile.save();
+    console.log("✅ Profile created:", profile._id);
     
     const token = crypto.randomBytes(32).toString("hex");
     await User.updateOne({ _id: newUser._id }, { $set: { token } });
+    console.log("Token generated and saved");
     
     return res.status(201).json({ 
       message: "User registered successfully", 
@@ -157,7 +197,10 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ 
+      message: error.message,
+      error: process.env.NODE_ENV === 'development' ? error.toString() : undefined
+    });
   }
 };
 export const login = async (req, res) => {

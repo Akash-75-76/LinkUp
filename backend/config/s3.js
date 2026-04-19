@@ -71,5 +71,7 @@ export const deleteFromS3 = async (fileUrl) => {
     throw new Error(`S3 Delete failed: ${error.message}`);
   }
 };
-
+console.log("AWS KEY:", process.env.AWS_ACCESS_KEY_ID);
+console.log("AWS SECRET:", process.env.AWS_SECRET_ACCESS_KEY ? "present" : "missing");
+console.log("BUCKET:", process.env.AWS_S3_BUCKET);
 export { s3Client, BUCKET_NAME, AWS_REGION };

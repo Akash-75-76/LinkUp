@@ -14,10 +14,8 @@ export const API_BASE_URL = String(raw).replace(/\/$/, "");
 /** Origin for `/uploads/...` (no `/api` segment) */
 export const UPLOADS_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
+/** No default Content-Type — JSON requests get `application/json` from Axios when `data` is a plain object; FormData needs the boundary (set by the browser). */
 export const clientServer = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
   timeout: 10000,
 });

@@ -64,6 +64,16 @@ export const register = async (req, res) => {
     console.log("6️⃣  After destructuring - education:", education, "type:", typeof education);
     console.log("6️⃣  After destructuring - name:", name, "username:", username, "email:", email);
     
+    // ✅ DEFENSIVE: Ensure values are defined
+    name = name || undefined;
+    username = username || undefined;
+    email = email || undefined;
+    password = password || undefined;
+    bio = bio || "";
+    currentPost = currentPost || "";
+    education = education || "[]";
+    pastWork = pastWork || "[]";
+    
     // ✅ ROBUST: Parse JSON strings from FormData - handle all cases
     const parseJSONArray = (field, fieldName) => {
       if (Array.isArray(field)) {
@@ -184,21 +194,24 @@ export const register = async (req, res) => {
     await User.updateOne({ _id: newUser._id }, { $set: { token } });
     console.log("Token generated and saved");
     
-    return res.status(201).json({ 
+    const responseData = { 
       message: "User registered successfully", 
-      token,
+      token: token || "",
       user: {
-        _id: newUser._id,
-        name: newUser.name,
-        username: newUser.username,
-        email: newUser.email,
-        profilePicture: newUser.profilePicture
+        _id: String(newUser._id),
+        name: String(newUser.name || ""),
+        username: String(newUser.username || ""),
+        email: String(newUser.email || ""),
+        profilePicture: String(newUser.profilePicture || "default.jpg")
       }
-    });
+    };
+    
+    console.log("✅ Sending response:", responseData);
+    return res.status(201).json(responseData);
   } catch (error) {
     console.error("Registration error:", error);
     return res.status(500).json({ 
-      message: error.message,
+      message: error.message || "Registration failed",
       error: process.env.NODE_ENV === 'development' ? error.toString() : undefined
     });
   }

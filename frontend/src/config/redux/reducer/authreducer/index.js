@@ -129,10 +129,17 @@ const authSlice = createSlice({
         state.isTokenThere = true;
         state.message = "Account created successfully!";
         
-        state.user = {
-          ...action.payload.user,
-          token: action.payload.token
-        };
+        if (action.payload && action.payload.user) {
+          state.user = {
+            ...action.payload.user,
+            token: action.payload.token
+          };
+        } else {
+          console.error("Invalid registration response:", action.payload);
+          state.user = null;
+          state.isError = true;
+          state.message = "Registration response invalid";
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;

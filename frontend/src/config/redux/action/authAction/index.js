@@ -58,21 +58,25 @@ export const registerUser = createAsyncThunk(
         console.log("Profile picture added to FormData");
       }
       
-      const response = await clientServer.post('/users/register', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // ✅ FIX: Do NOT set Content-Type manually - let axios handle it automatically with FormData
+      // When you manually set multipart/form-data without the boundary, it breaks the request
+      const response = await clientServer.post('/users/register', formData);
       
       console.log("Register API response:", response.data);
+      
+      if (!response.data) {
+        throw new Error("Empty response from server");
+      }
       
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
-      return response.data;
+      
+      return response.data || { message: "Registration successful", token: null, user: null };
     } catch (error) {
       console.error("Register error:", error.response?.data || error.message);
-      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || error.message || "Registration failed";
+      return thunkAPI.rejectWithValue({ message: errorMessage });
     }
   }
 );

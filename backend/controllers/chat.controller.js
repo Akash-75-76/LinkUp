@@ -1,5 +1,6 @@
 import { Message, ChatRoom } from '../models/chat.model.js';
 import User from '../models/user.model.js';
+import { uploadToS3, deleteFromS3 } from '../config/s3.js';
 
 export const sendMessage = async (req, res) => {
   const { token, receiverId, message } = req.body;
@@ -89,6 +90,16 @@ export const sendImageMessage = async (req, res) => {
       return res.status(403).json({ message: "You can only message your connections" });
     }
 
+    // Upload image to S3
+    let mediaUrl = null;
+    try {
+      mediaUrl = await uploadToS3(req.file.buffer, req.file.originalname, 'chat-images');
+      console.log("Chat image uploaded to S3:", mediaUrl);
+    } catch (s3Error) {
+      console.error("Failed to upload chat image to S3:", s3Error);
+      return res.status(500).json({ message: "Failed to upload image: " + s3Error.message });
+    }
+
     // Find or create chat room
     let chatRoom = await ChatRoom.findOne({
       participants: { $all: [sender._id, receiverId] }
@@ -107,7 +118,7 @@ export const sendImageMessage = async (req, res) => {
       receiverId: receiverId,
       message: '📷 Image',
       messageType: 'image',
-      mediaUrl: req.file.filename
+      mediaUrl: mediaUrl
     });
 
     await newMessage.save();

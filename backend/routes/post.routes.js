@@ -14,23 +14,11 @@ import {
   getUsersPostsCount
 
 } from "../controllers/post.controller.js";
-import multer from "multer";
+import upload from "../middleware/fileUpload.js";
 
 const router = Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
-});
-
-const upload = multer({ storage: storage });
-
 // Routes
-
 
 // Temporary cleanup route - REMOVE AFTER USE
 router.get('/cleanup', cleanupDatabase);

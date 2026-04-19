@@ -2,12 +2,13 @@ import Post from "../models/posts.model.js";
 import User from "../models/user.model.js";
 import Comment from "../models/comments.model.js";
 import mongoose from "mongoose";
+import { uploadToS3, deleteFromS3 } from "../config/s3.js";
 
 export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "Running" });
 };
 
-// FIXED: Create post with proper error handling
+// FIXED: Create post with proper S3 media upload
 export const createPost = async (req, res) => {
   const { token, body } = req.body;
 
@@ -21,11 +22,26 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "Post content is required" });
     }
 
+    let mediaUrl = null;
+    let fileType = null;
+
+    // Upload media to S3 if provided
+    if (req.file) {
+      try {
+        mediaUrl = await uploadToS3(req.file.buffer, req.file.originalname, 'post-images');
+        fileType = req.file.mimetype.split("/")[0];
+        console.log("Post media uploaded to S3:", mediaUrl);
+      } catch (s3Error) {
+        console.error("Failed to upload post media to S3:", s3Error);
+        return res.status(500).json({ message: "Failed to upload media: " + s3Error.message });
+      }
+    }
+
     const newPost = new Post({
       userId: user._id,
       body: body.trim(),
-      media: req.file ? req.file.filename : null,
-      fileType: req.file ? req.file.mimetype.split("/")[0] : null,
+      media: mediaUrl,
+      fileType: fileType,
     });
 
     await newPost.save();

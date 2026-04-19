@@ -22,25 +22,14 @@ import {
   getFollowingCount,
   checkIfFollowing
 } from "../controllers/user.controller.js";
-import multer from "multer";
+import upload from "../middleware/fileUpload.js";
 
 const router = Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+// ✅ Registration route with optional profile picture upload (memory storage -> S3)
+router.route("/register").post(upload.single("profile_pic"), register);
 
-const upload = multer({ storage: storage });
-
-// ✅ TEMPORARY FIX: Remove multer from register route for now
-router.route("/register").post(register);
-
-// Profile picture upload route (this stays with multer)
+// Profile picture upload route (uses memory storage -> S3)
 router.post(
   "/update_profile_pic",
   upload.single("profile_pic"),

@@ -1,6 +1,6 @@
 import { Message, ChatRoom } from '../models/chat.model.js';
 import User from '../models/user.model.js';
-import { uploadToS3, deleteFromS3 } from '../config/s3.js';
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 export const sendMessage = async (req, res) => {
   const { token, receiverId, message } = req.body;
@@ -90,14 +90,21 @@ export const sendImageMessage = async (req, res) => {
       return res.status(403).json({ message: "You can only message your connections" });
     }
 
-    // Upload image to S3
+    // Upload image to Cloudinary
     let mediaUrl = null;
     try {
-      mediaUrl = await uploadToS3(req.file.buffer, req.file.originalname, 'chat-images');
-      console.log("Chat image uploaded to S3:", mediaUrl);
-    } catch (s3Error) {
-      console.error("Failed to upload chat image to S3:", s3Error);
-      return res.status(500).json({ message: "Failed to upload image: " + s3Error.message });
+      mediaUrl = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.originalname,
+        "chat-images",
+        req.file.mimetype
+      );
+      console.log("Chat image uploaded to Cloudinary:", mediaUrl);
+    } catch (uploadError) {
+      console.error("Failed to upload chat image to Cloudinary:", uploadError);
+      return res
+        .status(500)
+        .json({ message: "Failed to upload image: " + uploadError.message });
     }
 
     // Find or create chat room

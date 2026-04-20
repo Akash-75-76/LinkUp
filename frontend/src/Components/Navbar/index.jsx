@@ -80,6 +80,8 @@ const Navbar = () => {
       // Open chat — handled by existing infrastructure
     } else if (notif.type === 'connection_request' || notif.type === 'connection_accepted') {
       router.push('/myConnections');
+    } else if (notif.type === 'follow' && notif.from?._id) {
+      router.push(`/profile/${notif.from._id}`);
     }
     setShowNotifications(false);
   };

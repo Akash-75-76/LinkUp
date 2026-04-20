@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 import ConnectionRequest from "../models/connections.model.js";
 import Follow from "../models/follow.model.js";
-import { uploadToS3, deleteFromS3 } from "../config/s3.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
 import Post from "../models/posts.model.js";
 import { Notification } from "../models/chat.model.js";
 import { emitToUser, emitRelationshipUpdate } from "../socket.js";
@@ -118,16 +118,21 @@ export const register = async (req, res) => {
       pastWorkLength: Array.isArray(pastWork) ? pastWork.length : 0
     });
 
-    // ✅ Handle profile picture upload to S3
+    // ✅ Handle profile picture upload to Cloudinary
     let profilePicture = "default.jpg";
     if (req.file) {
       try {
-        const s3Url = await uploadToS3(req.file.buffer, req.file.originalname, 'profile-pictures');
-        profilePicture = s3Url;
-        console.log("Profile picture uploaded to S3:", profilePicture);
+        const url = await uploadToCloudinary(
+          req.file.buffer,
+          req.file.originalname,
+          "profile-pictures",
+          req.file.mimetype
+        );
+        profilePicture = url;
+        console.log("Profile picture uploaded to Cloudinary:", profilePicture);
       } catch (error) {
-        console.error("Failed to upload profile picture to S3:", error);
-        // Continue with default if S3 upload fails
+        console.error("Failed to upload profile picture to Cloudinary:", error);
+        // Continue with default if upload fails
       }
     } else {
       console.log("No profile picture file received");
@@ -253,7 +258,7 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-// Upload profile picture to S3
+// Upload profile picture to Cloudinary
 export const uploadProfilePic = async (req, res) => {
   try {
     const { token } = req.body;
@@ -268,34 +273,45 @@ export const uploadProfilePic = async (req, res) => {
     }
 
     try {
-      // Upload to S3
-      const s3Url = await uploadToS3(req.file.buffer, req.file.originalname, 'profile-pictures');
+      // Upload to Cloudinary
+      const url = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.originalname,
+        "profile-pictures",
+        req.file.mimetype
+      );
       
-      console.log("Profile picture uploaded to S3:", {
+      console.log("Profile picture uploaded to Cloudinary:", {
         userId: user._id,
-        s3Url: s3Url
+        url
       });
 
-      // Delete old profile picture from S3 if exists and not default
-      if (user.profilePicture && user.profilePicture !== "default.jpg" && user.profilePicture.includes('s3')) {
+      // Delete old Cloudinary profile picture if exists and not default
+      if (
+        user.profilePicture &&
+        user.profilePicture !== "default.jpg" &&
+        user.profilePicture.includes("res.cloudinary.com")
+      ) {
         try {
-          await deleteFromS3(user.profilePicture);
+          await deleteFromCloudinary(user.profilePicture);
         } catch (deleteError) {
-          console.warn("Failed to delete old profile picture from S3:", deleteError);
+          console.warn("Failed to delete old profile picture from Cloudinary:", deleteError);
         }
       }
 
       // Update user with new profile picture URL
-      user.profilePicture = s3Url;
+      user.profilePicture = url;
       await user.save();
 
       return res.status(200).json({ 
         message: "Profile picture uploaded successfully",
-        profilePicture: s3Url 
+        profilePicture: url 
       });
-    } catch (s3Error) {
-      console.error("S3 upload error:", s3Error);
-      return res.status(500).json({ message: "Failed to upload to S3: " + s3Error.message });
+    } catch (uploadError) {
+      console.error("Cloudinary upload error:", uploadError);
+      return res
+        .status(500)
+        .json({ message: "Failed to upload to Cloudinary: " + uploadError.message });
     }
   } catch (error) {
     console.error("Profile picture upload error:", error);
@@ -1042,6 +1058,25 @@ export const followUser = async (req, res) => {
     });
 
     await follow.save();
+
+    // Create + emit notification for the user being followed
+    try {
+      const followNotif = new Notification({
+        type: "follow",
+        from: follower._id,
+        to: followingId,
+        message: `${follower.name} started following you`,
+        metadata: { followerId: String(follower._id) },
+      });
+      await followNotif.save();
+      await followNotif.populate("from", "name username profilePicture");
+
+      if (req.io) {
+        emitToUser(req.io, followingId, "notification", followNotif.toObject());
+      }
+    } catch (notifErr) {
+      console.error("Follow notification error:", notifErr);
+    }
 
     return res.status(201).json({ 
       message: "Successfully followed user",

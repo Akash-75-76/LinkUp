@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPost } from '@/config/redux/action/postAction';
 import { useRouter } from 'next/router';
+import { UPLOADS_BASE_URL } from '@/config';
 import Close from '@mui/icons-material/Close';
 import AddPhotoAlternate from '@mui/icons-material/AddPhotoAlternate';
 import Videocam from '@mui/icons-material/Videocam';
@@ -113,7 +114,9 @@ function CreatePostPage() {
             <img 
               src={
                 user?.profilePicture && user.profilePicture !== "default.jpg"
-                  ? `https://linkup-o722.onrender.com/uploads/${user.profilePicture}`
+                  ? (user.profilePicture.startsWith("http")
+                      ? user.profilePicture
+                      : `${UPLOADS_BASE_URL}/uploads/${user.profilePicture}`)
                   : "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTYiIHI9IjgiIGZpbGw9IiM5QjlCOUIiLz4KPHBhdGggZD0iTTAgMzRDMCAyOC4yNTYgNC4yNTYgMjQgMTAgMjRIMzBDMzUuNzQ0IDI0IDQwIDI4LjI1NiA0MCAzNFY0MEgwVjM0WiIgZmlsbD0iIzlCOUI5QiIvPgo8L3N2Zz4="
               }
               alt="Your profile"

@@ -2,7 +2,7 @@ import Post from "../models/posts.model.js";
 import User from "../models/user.model.js";
 import Comment from "../models/comments.model.js";
 import mongoose from "mongoose";
-import { uploadToS3, deleteFromS3 } from "../config/s3.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "Running" });
@@ -25,15 +25,22 @@ export const createPost = async (req, res) => {
     let mediaUrl = null;
     let fileType = null;
 
-    // Upload media to S3 if provided
+    // Upload media to Cloudinary if provided
     if (req.file) {
       try {
-        mediaUrl = await uploadToS3(req.file.buffer, req.file.originalname, 'post-images');
+        mediaUrl = await uploadToCloudinary(
+          req.file.buffer,
+          req.file.originalname,
+          "post-images",
+          req.file.mimetype
+        );
         fileType = req.file.mimetype.split("/")[0];
-        console.log("Post media uploaded to S3:", mediaUrl);
-      } catch (s3Error) {
-        console.error("Failed to upload post media to S3:", s3Error);
-        return res.status(500).json({ message: "Failed to upload media: " + s3Error.message });
+        console.log("Post media uploaded to Cloudinary:", mediaUrl);
+      } catch (uploadError) {
+        console.error("Failed to upload post media to Cloudinary:", uploadError);
+        return res
+          .status(500)
+          .json({ message: "Failed to upload media: " + uploadError.message });
       }
     }
 

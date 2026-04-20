@@ -18,6 +18,14 @@ import styles from "./PostFeed.module.css";
 
 const DEFAULT_AVATAR = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjIwIiBmaWxsPSIjOUI5QjlCIi8+CjxwYXRoIGQ9Ik0wIDg1QzAgNzAuNjQgMTEuNjQgNTkgMjYgNTlINzRDODguMzYgNTkgMTAwIDcwLjY0IDEwMCA4NVYxMDBIMFY4NVoiIGZpbGw9IiM5QjlCOUIiLz4KPC9zdmc+";
 
+const isAbsoluteUrl = (value) =>
+  typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://"));
+
+const resolveUploadsUrl = (value) => {
+  if (!value || value === "default.jpg") return null;
+  return isAbsoluteUrl(value) ? value : `${UPLOADS_BASE_URL}/uploads/${value}`;
+};
+
 const PostFeed = () => {
   const dispatch = useDispatch();
   const { posts, isLoading } = useSelector((state) => state.posts);
@@ -81,12 +89,7 @@ const PostFeed = () => {
                 <div className={styles.userInfo}>
                   <img
                     src={
-                      post.userId?.profilePicture &&
-                      post.userId.profilePicture !== "default.jpg"
-                        ? (post.userId.profilePicture.startsWith('http://') || post.userId.profilePicture.startsWith('https://') ?
-                            post.userId.profilePicture :
-                            `${UPLOADS_BASE_URL}/uploads/${post.userId.profilePicture}`)
-                        : DEFAULT_AVATAR
+                      resolveUploadsUrl(post.userId?.profilePicture) || DEFAULT_AVATAR
                     }
                     alt={post.userId?.name}
                     className={styles.avatar}
@@ -119,7 +122,7 @@ const PostFeed = () => {
                   <div className={styles.postMedia}>
                     {post.fileType === "image" ? (
                       <img
-                        src={`${API_BASE_URL}/uploads/${post.media}`}
+                        src={isAbsoluteUrl(post.media) ? post.media : `${API_BASE_URL}/uploads/${post.media}`}
                         alt="Post media"
                         className={styles.media}
                         onError={(e) => {
@@ -129,14 +132,14 @@ const PostFeed = () => {
                       />
                     ) : post.fileType === "video" ? (
                       <video controls className={styles.media}>
-                        <source src={`${API_BASE_URL}/uploads/${post.media}`} />
+                        <source src={isAbsoluteUrl(post.media) ? post.media : `${API_BASE_URL}/uploads/${post.media}`} />
                         Your browser does not support the video tag.
                       </video>
                     ) : (
                       <div className={styles.unknownMedia}>
                         <p>Media file: {post.media}</p>
                         <a
-                          href={`${API_BASE_URL}/uploads/${post.media}`}
+                          href={isAbsoluteUrl(post.media) ? post.media : `${API_BASE_URL}/uploads/${post.media}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={styles.fileLink}
@@ -197,11 +200,7 @@ const PostFeed = () => {
                 <div className={styles.addComment}>
                   <img
                     src={
-                      user?.profilePicture && user.profilePicture !== "default.jpg"
-                        ? (user.profilePicture.startsWith('http://') || user.profilePicture.startsWith('https://') ?
-                            user.profilePicture :
-                            `${UPLOADS_BASE_URL}/uploads/${user.profilePicture}`)
-                        : DEFAULT_AVATAR
+                      resolveUploadsUrl(user?.profilePicture) || DEFAULT_AVATAR
                     }
                     alt="Your avatar"
                     className={styles.commenterAvatar}
@@ -239,12 +238,7 @@ const PostFeed = () => {
                     <div className={styles.commentHeader}>
                       <img
                         src={
-                          comment.userId?.profilePicture &&
-                          comment.userId.profilePicture !== "default.jpg"
-                            ? (comment.userId.profilePicture.startsWith('http://') || comment.userId.profilePicture.startsWith('https://') ?
-                                comment.userId.profilePicture :
-                                `${UPLOADS_BASE_URL}/uploads/${comment.userId.profilePicture}`)
-                            : DEFAULT_AVATAR
+                          resolveUploadsUrl(comment.userId?.profilePicture) || DEFAULT_AVATAR
                         }
                         alt={comment.userId?.name}
                         className={styles.commentAvatar}

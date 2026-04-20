@@ -57,7 +57,14 @@ const ChatRoomSchema = new mongoose.Schema({
 const NotificationSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['message', 'connection_request', 'connection_accepted', 'post_like', 'post_comment'],
+    enum: [
+      'message',
+      'connection_request',
+      'connection_accepted',
+      'follow',
+      'post_like',
+      'post_comment',
+    ],
     required: true
   },
   from: {

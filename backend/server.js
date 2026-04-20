@@ -17,7 +17,9 @@ const httpServer = createServer(app);
 const io = initSocket(httpServer);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "*"
+}));
 
 // Log raw request body for debugging FormData issues
 app.use((req, res, next) => {
@@ -81,7 +83,7 @@ app.use((err, req, res, next) => {
 });
 
 // Use httpServer instead of app.listen so Socket.IO shares the port
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`⚡ Socket.IO is ready for connections`);
 });

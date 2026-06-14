@@ -8,7 +8,7 @@ export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "Running" });
 };
 
-// FIXED: Create post with proper S3 media upload
+// Create post with Cloudinary media upload
 export const createPost = async (req, res) => {
   const { token, body } = req.body;
 

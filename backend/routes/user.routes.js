@@ -26,10 +26,10 @@ import upload from "../middleware/fileUpload.js";
 
 const router = Router();
 
-// ✅ Registration route with optional profile picture upload (memory storage -> S3)
+// Registration with optional profile picture (uploaded to Cloudinary)
 router.route("/register").post(upload.single("profile_pic"), register);
 
-// Profile picture upload route (uses memory storage -> S3)
+// Profile picture upload route
 router.post(
   "/update_profile_pic",
   upload.single("profile_pic"),

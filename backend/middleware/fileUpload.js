@@ -1,6 +1,6 @@
 import multer from 'multer';
 
-// Use memory storage since we'll upload to S3, not disk
+// Memory storage — files are uploaded to Cloudinary from the buffer
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {

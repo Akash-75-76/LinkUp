@@ -3,14 +3,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "env": {
-    "NEXT_PUBLIC_API_URL": {
-      "description": "Backend API URL for production"
-    },
-    "NEXT_PUBLIC_SOCKET_URL": {
-      "description": "WebSocket URL for Socket.io connection"
-    }
-  },
   "regions": ["iad1"],
   "git": {
     "deploymentEnabled": {
